@@ -1,5 +1,5 @@
 module "label_monthly_total" {
-  source  = "git@github.com:bendoerr/terraform-null-label?ref=v0.3.0"
+  source  = "git@github.com:bendoerr-terraform-modules/terraform-null-label?ref=v0.4.0"
   context = var.context
   name    = "budget-monthly-total"
 }

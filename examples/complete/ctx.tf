@@ -1,5 +1,5 @@
 module "context" {
-  source         = "git@github.com:bendoerr/terraform-null-context?ref=v0.3.0"
+  source         = "git@github.com:bendoerr-terraform-modules/terraform-null-context?ref=v0.4.0"
   namespace      = var.namespace
   environment    = var.environment
   role           = var.role
