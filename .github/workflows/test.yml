@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: webfactory/ssh-agent@v0.8.0
         with:
-          ssh-private-key: ${{ secrets.GH_TF_NULL_CTX_SSH_KEY }}
+          ssh-private-key: |
+            ${{ secrets.GH_TF_NULL_CTX_SSH_KEY }}
+            ${{ secrets.GH_TF_NULL_LABEL_SSH_KEY }}
       - name: Run Terratest
         uses: cloudposse/github-action-terratest@main
         with:

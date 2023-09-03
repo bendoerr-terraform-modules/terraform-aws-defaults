@@ -47,7 +47,7 @@ func TestDefaults(t *testing.T) {
 	// Start by checking the billing budgets
 	budgetName := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_name")
 	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
-	budgetLimit := terraform.GetVariableAsStringFromVarFile(t, terraformOptions.VarFiles[0], "budget_monthly_limit")
+	budgetLimit := "1.0"
 
 	budgetsSvc := budgets.NewFromConfig(cfg)
 	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
