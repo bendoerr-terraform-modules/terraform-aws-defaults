@@ -82,3 +82,18 @@ module "vpc_default" {
   ]
 }
 
+output "vpc_id" {
+  value = module.vpc_default.vpc_id
+}
+
+output "vpc_azs" {
+  value = module.vpc_default.azs
+}
+
+output "vpc_public_subnet_ids" {
+  value = module.vpc_default.public_subnets
+}
+
+output "vpc_private_subnet_ids" {
+  value = module.vpc_default.private_subnets
+}

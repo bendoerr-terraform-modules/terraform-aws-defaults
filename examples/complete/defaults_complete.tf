@@ -14,3 +14,19 @@ output "aws_budgets_budget_monthly_total_name" {
 output "aws_budgets_budget_monthly_total_account" {
   value = module.aws_defaults.aws_budgets_budget_monthly_total_account
 }
+
+output "vpc_id" {
+  value = module.aws_defaults.vpc_id
+}
+
+output "vpc_azs" {
+  value = module.aws_defaults.vpc_azs
+}
+
+output "vpc_public_subnet_ids" {
+  value = module.aws_defaults.vpc_public_subnet_ids
+}
+
+output "vpc_private_subnet_ids" {
+  value = module.aws_defaults.vpc_private_subnet_ids
+}
