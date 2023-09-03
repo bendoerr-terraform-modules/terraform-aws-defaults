@@ -1,0 +1,22 @@
+name: Pull Request
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened, closed, labeled, unlabeled ]
+
+jobs:
+  terratest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.GH_TF_NULL_CTX_SSH_KEY }}
+      - name: Run Terratest
+        uses: cloudposse/github-action-terratest@main
+        with:
+          sourceDir: test
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
