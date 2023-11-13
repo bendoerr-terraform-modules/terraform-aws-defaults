@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.23.0
-	github.com/aws/aws-sdk-go-v2/service/budgets v1.16.4
+	github.com/aws/aws-sdk-go-v2/service/budgets v1.19.1
 	github.com/gruntwork-io/terratest v0.46.5
 	github.com/kr/pretty v0.3.1
 )
