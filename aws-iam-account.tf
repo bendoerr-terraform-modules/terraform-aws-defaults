@@ -6,7 +6,7 @@ module "label_account_alias" {
 
 module "iam_account" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-account"
-  version = "5.30.1"
+  version = "5.30.2"
 
   account_alias = module.label_account_alias.id
 
