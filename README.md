@@ -49,6 +49,7 @@ module "aws_defaults" {
 }
 ```
 
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -66,11 +67,11 @@ module "aws_defaults" {
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_iam_account"></a> [iam\_account](#module\_iam\_account) | terraform-aws-modules/iam/aws//modules/iam-account | 5.30.0 |
+| <a name="module_iam_account"></a> [iam\_account](#module\_iam\_account) | terraform-aws-modules/iam/aws//modules/iam-account | 5.32.0 |
 | <a name="module_label_account_alias"></a> [label\_account\_alias](#module\_label\_account\_alias) | git@github.com:bendoerr-terraform-modules/terraform-null-label | v0.4.0 |
 | <a name="module_label_monthly_total"></a> [label\_monthly\_total](#module\_label\_monthly\_total) | git@github.com:bendoerr-terraform-modules/terraform-null-label | v0.4.0 |
 | <a name="module_label_network"></a> [label\_network](#module\_label\_network) | git@github.com:bendoerr-terraform-modules/terraform-null-label | v0.4.0 |
-| <a name="module_vpc_default"></a> [vpc\_default](#module\_vpc\_default) | terraform-aws-modules/vpc/aws | 5.1.1 |
+| <a name="module_vpc_default"></a> [vpc\_default](#module\_vpc\_default) | terraform-aws-modules/vpc/aws | 5.2.0 |
 
 ## Resources
 
@@ -104,7 +105,7 @@ module "aws_defaults" {
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
 | <a name="output_vpc_private_subnet_ids"></a> [vpc\_private\_subnet\_ids](#output\_vpc\_private\_subnet\_ids) | n/a |
 | <a name="output_vpc_public_subnet_ids"></a> [vpc\_public\_subnet\_ids](#output\_vpc\_public\_subnet\_ids) | n/a |
-
+<!-- END_TF_DOCS -->
 
 ## Roadmap
 
