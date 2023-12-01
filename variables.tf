@@ -35,6 +35,7 @@ variable "network" {
   type = object({
     cidr           = string
     enable_nat     = bool
+    one_nat        = bool
     enable_private = bool
     subnets        = list(object({
       az      = string
@@ -45,6 +46,7 @@ variable "network" {
   default = {
     cidr           = "0.0.0.0/0"
     enable_nat     = false
+    one_nat        = true
     enable_private = false
     subnets        = [
       {

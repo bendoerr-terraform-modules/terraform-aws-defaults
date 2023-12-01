@@ -29,8 +29,8 @@ module "vpc_default" {
   # per GB cost of data, disable them until the private networks actually need
   # to use them.
   enable_nat_gateway     = var.network.enable_nat
-  single_nat_gateway     = var.network.enable_nat
-  one_nat_gateway_per_az = false
+  single_nat_gateway     = var.network.one_nat
+  one_nat_gateway_per_az = true
   enable_dns_hostnames   = true
   enable_ipv6            = false
 

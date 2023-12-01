@@ -1,0 +1,26 @@
+version: 0.1
+projects:
+  - path: examples/complete
+    name: With Public Subnets Only
+    usage_file: ../.infracost-usage.yml
+    terraform_var_files:
+      - complete.tfvars
+      - ../public-only.tfvars
+  - path: examples/complete
+    name: With Public & Private Subnets no/NAT
+    usage_file: ../.infracost-usage.yml
+    terraform_var_files:
+      - complete.tfvars
+      - ../private-no-nat.tfvars
+  - path: examples/complete
+    name: With Public & Private Subnets with one NAT
+    usage_file: examples/.infracost-usage.yml
+    terraform_var_files:
+      - complete.tfvars
+      - ../private-with-nat.tfvars
+  - path: examples/complete
+    name: With Public & Private Subnets with NAT per AZ
+    usage_file: examples/.infracost-usage.yml
+    terraform_var_files:
+      - complete.tfvars
+      - ../private-with-nat-per-az.tfvars
