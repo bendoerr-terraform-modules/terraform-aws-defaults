@@ -37,7 +37,7 @@ variable "network" {
     enable_nat     = bool
     one_nat        = bool
     enable_private = bool
-    subnets        = list(object({
+    subnets = list(object({
       az      = string
       public  = string
       private = string
@@ -48,7 +48,7 @@ variable "network" {
     enable_nat     = false
     one_nat        = true
     enable_private = false
-    subnets        = [
+    subnets = [
       {
         az      = "us-east-1a"
         public  = "0.0.0.0/0"

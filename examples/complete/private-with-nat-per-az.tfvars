@@ -3,7 +3,7 @@ network = {
   enable_nat     = true
   one_nat        = false
   enable_private = true
-  subnets        = [
+  subnets = [
     {
       az      = "us-east-1a"
       public  = "10.10.1.0/24"

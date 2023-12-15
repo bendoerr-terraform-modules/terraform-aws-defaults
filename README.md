@@ -34,7 +34,8 @@ My opinionated AWS Defaults module.
 
 ```
 module "context" {
-  source    = "git@github.com:bendoerr-terraform-modules/terraform-null-context?ref=v0.4.0"
+    source  = "bendoerr-terraform-modules/context/null"
+  version = "0.4.1"
   namespace = "brd"
   role      = "production'
   region    = "us-east-1"
