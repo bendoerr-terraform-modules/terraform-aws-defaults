@@ -1,6 +1,8 @@
 module github.com/bendoerr-terraform-modules/terraform-null-context/test
 
-go 1.20
+go 1.21
+
+toolchain go1.21.4
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.26.1

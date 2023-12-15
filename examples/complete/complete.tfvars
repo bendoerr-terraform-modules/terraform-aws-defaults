@@ -7,7 +7,7 @@ region_short   = "uw2"
 instance       = "demo"
 instance_short = "dmo"
 project        = "test"
-attributes     = [
+attributes = [
   "attr1"
 ]
 tags = {
@@ -24,7 +24,7 @@ network = {
   enable_nat     = false
   one_nat        = true
   enable_private = true
-  subnets        = [
+  subnets = [
     {
       az      = "us-east-1a"
       public  = "10.10.1.0/24"

@@ -1,5 +1,5 @@
 variable "namespace" {
-  type    = string
+  type        = string
   description = <<-EOT
     Element to ensure resources are generated with names that are globally
     unique and do not collide. This should be a short key such as initials.
@@ -7,8 +7,8 @@ variable "namespace" {
 }
 
 variable "environment" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     Element to identify the region and/or the role. If not provided this element
     defaults to <role_short>-<region_short>(-<instance_short>).
@@ -16,8 +16,8 @@ variable "environment" {
 }
 
 variable "role" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     A simple name for the hosting provider account or workspace. Included in
     tags to ensure that identification is simple across accounts. Examples
@@ -26,8 +26,8 @@ variable "role" {
 }
 
 variable "role_short" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     Shortened version of the 'role'.
     Automatic shortening is done by removal of vowels unless handled by special
@@ -36,16 +36,16 @@ variable "role_short" {
 }
 
 variable "region" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     Key for the hosting provider region.
     EOT
 }
 
 variable "region_short" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     Shortened version of the 'region'.
     Automatic shortening is done by removal of vowels unless handled by special
@@ -54,8 +54,8 @@ variable "region_short" {
 }
 
 variable "instance" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     Element to identify a tenant or copy of an environment (blue-green
     deployments). This is not used often.
@@ -63,8 +63,8 @@ variable "instance" {
 }
 
 variable "instance_short" {
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
   description = <<-EOT
     Shortened version of the 'instance'.
     Automatic shortening is done by removal of vowels.
@@ -72,14 +72,14 @@ variable "instance_short" {
 }
 
 variable "attributes" {
-  type    = list(string)
-  default = []
+  type        = list(string)
+  default     = []
   description = "Additional id elements that would be appended."
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type        = map(string)
+  default     = {}
   description = "Additional tags to include."
 }
 
@@ -103,8 +103,8 @@ variable "context" {
 }
 
 variable "project" {
-  type = string
-  default = ""
+  type        = string
+  default     = ""
   description = "Name of the project or application, this can override the context's project"
 }
 
@@ -129,7 +129,7 @@ variable "network" {
     enable_nat     = bool
     one_nat        = bool
     enable_private = bool
-    subnets        = list(object({
+    subnets = list(object({
       az      = string
       public  = string
       private = string
@@ -140,7 +140,7 @@ variable "network" {
     enable_nat     = false
     one_nat        = true
     enable_private = false
-    subnets        = [
+    subnets = [
       {
         az      = "us-east-1a"
         public  = "0.0.0.0/0"
