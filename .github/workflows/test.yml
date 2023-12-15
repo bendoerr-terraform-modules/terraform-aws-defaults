@@ -10,12 +10,17 @@ jobs:
   terratest:
     runs-on: ubuntu-latest
     steps:
-      - uses: webfactory/ssh-agent@v0.8.0
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: webfactory/ssh-agent@d4b9b8ff72958532804b70bbe600ad43b36d5f2e # v0.8.0
         with:
           ssh-private-key: |
             ${{ secrets.ORG_ACCESS_SSH_KEY }}
       - name: Run Terratest
-        uses: cloudposse/github-action-terratest@main
+        uses: cloudposse/github-action-terratest@bcc438f66e180dcaafcacdf8644967dea9eaf7d2 # main
         with:
           sourceDir: test
         env:
