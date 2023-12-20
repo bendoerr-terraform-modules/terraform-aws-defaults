@@ -7,6 +7,7 @@ toolchain go1.21.4
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.26.1
 	github.com/aws/aws-sdk-go-v2/service/budgets v1.20.5
+	github.com/aws/aws-sdk-go-v2/service/iam v1.28.5
 	github.com/gruntwork-io/terratest v0.46.8
 	github.com/kr/pretty v0.3.1
 )

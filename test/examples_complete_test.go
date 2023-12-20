@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/budgets"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/kr/pretty"
@@ -12,8 +13,39 @@ import (
 )
 
 func TestDefaults(t *testing.T) {
-	t.Parallel()
+	// AWS Session
+	cfg, err := config.LoadDefaultConfig(
+		context.TODO(),
+		config.WithRegion("us-east-1"),
+	)
 
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Before starting grab the account alias so that we can reset it when done
+	iamSvc := iam.NewFromConfig(cfg)
+	aa, err := iamSvc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(aa.AccountAliases) > 1 {
+		t.Fatal("well that is unexpected")
+	}
+
+	if len(aa.AccountAliases) > 0 {
+		defer func(accountAlias string) {
+			t.Log("Setting account alias: " + accountAlias)
+			iamSvc := iam.NewFromConfig(cfg)
+			_, err := iamSvc.CreateAccountAlias(context.TODO(), &iam.CreateAccountAliasInput{AccountAlias: &accountAlias})
+			if err != nil {
+				t.Fatal(err)
+			}
+		}(aa.AccountAliases[0])
+	}
+
+	// Setup terratest
 	rootFolder := "../"
 	terraformFolderRelativeToRoot := "examples/complete"
 
@@ -31,16 +63,6 @@ func TestDefaults(t *testing.T) {
 
 	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
 	terraform.InitAndApply(t, terraformOptions)
-
-	// AWS Session
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithRegion("us-east-1"),
-	)
-
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	pretty.Print(terraform.OutputAll(t, terraformOptions))
 
