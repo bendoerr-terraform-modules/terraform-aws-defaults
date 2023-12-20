@@ -1,0 +1,173 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  tflint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: tflint
+        uses: reviewdog/action-tflint@d39483f7058c6772a9641473d4d3b5c372a3a10d # v1.20.0
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+          tflint_init: true
+          flags: --no-module --recursive
+  trivy:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: trivy
+        uses: reviewdog/action-trivy@a322dfa8b4eb7aa12dfaa9770bf3afc32dbea7ce # v1.1.0
+        with:
+          github_token: ${{ github.token }}
+          trivy_command: config
+          trivy_target: "."
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+  golangci-lint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: golangci-lint
+        uses: reviewdog/action-golangci-lint@94d61e3205b61acf4ddabfeb13c5f8a13eb4167b # v2.5.0
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+          workdir: test/
+          go_version_file: test/go.mod
+  prettier:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: create package.json
+        run: |
+          echo -e '{"devDependencies": {"prettier": "^3.1.0"}}' > package.json
+      - name: prettier
+        uses: EPMatt/reviewdog-action-prettier@93fb51ed5da157256e1d8c998fb249837304050c # v1.2.0
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+  misspell:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: misspell
+        uses: reviewdog/action-misspell@4348e72b9038b006ffc37b6b0dd4421a2e9a68ef # v1.14.1
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+          exclude: |
+            ./.git/*
+            ./.cache/*
+  alex:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: alex
+        uses: reviewdog/action-alex@83d6502258513773127065a4d8d53c2c84697579 # v1.7.0
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+          alex_flags: |
+            * .github/* .github/workflows/* docs/* test/* examples/complete/*
+  markdownlint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: markdownlint
+        uses: reviewdog/action-markdownlint@6e02140816b5fcc7295ea7ae2a664af18190ff29 # v0.14.0
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
+          markdownlint_flags: |
+            --disable MD033 MD013 -- .
+  actionlint:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: actionlint
+        uses: reviewdog/action-actionlint@82693e9e3b239f213108d6e412506f8b54003586 # v1.39.1
+        with:
+          github_token: ${{ github.token }}
+          reporter: github-pr-review
+          fail_on_error: "false"
+          filter_mode: file
