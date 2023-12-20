@@ -1,0 +1,3 @@
+[[IgnoredVulns]]
+id = "GO-2022-0646"
+reason = "does not use the the V1 EncryptionClient of aws-sdk-go"
