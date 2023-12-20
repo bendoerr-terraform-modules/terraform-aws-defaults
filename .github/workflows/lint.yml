@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: tflint
-        uses: reviewdog/action-tflint@d39483f7058c6772a9641473d4d3b5c372a3a10d # v1.20.0
+        uses: reviewdog/action-tflint@689bb1b9fd0767aeb064618494e6f1e0d705eb24 # v1.21.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -104,7 +104,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: misspell
-        uses: reviewdog/action-misspell@4348e72b9038b006ffc37b6b0dd4421a2e9a68ef # v1.14.1
+        uses: reviewdog/action-misspell@06d6a480724fa783c220081bbc22336a78dbbe82 # v1.15.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -165,7 +165,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: actionlint
-        uses: reviewdog/action-actionlint@82693e9e3b239f213108d6e412506f8b54003586 # v1.39.1
+        uses: reviewdog/action-actionlint@9ccda195fd3a290c8596db7f1958c897deaa8c76 # v1.40.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
