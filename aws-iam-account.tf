@@ -14,9 +14,9 @@ module "iam_account" {
   create_account_password_policy = true
   allow_users_to_change_password = true
   hard_expiry                    = false
-  max_password_age               = 365
+  max_password_age               = 90
   minimum_password_length        = 32
-  password_reuse_prevention      = null
+  password_reuse_prevention      = 5
   require_lowercase_characters   = true
   require_numbers                = true
   require_symbols                = true

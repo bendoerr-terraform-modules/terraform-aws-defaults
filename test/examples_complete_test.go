@@ -3,13 +3,14 @@ package test_test
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/budgets"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/kr/pretty"
-	"testing"
 )
 
 func TestDefaults(t *testing.T) {
@@ -37,8 +38,8 @@ func TestDefaults(t *testing.T) {
 	if len(aa.AccountAliases) > 0 {
 		defer func(accountAlias string) {
 			t.Log("Setting account alias: " + accountAlias)
-			iamSvc := iam.NewFromConfig(cfg)
-			_, err := iamSvc.CreateAccountAlias(context.TODO(), &iam.CreateAccountAliasInput{AccountAlias: &accountAlias})
+			iamSvc = iam.NewFromConfig(cfg)
+			_, err = iamSvc.CreateAccountAlias(context.TODO(), &iam.CreateAccountAliasInput{AccountAlias: &accountAlias})
 			if err != nil {
 				t.Fatal(err)
 			}
