@@ -2,12 +2,12 @@
 <p align="center">
   <a href="https://github.com/bendoerr-terraform-modules/terraform-aws-defaults">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.png">
-      <img src="docs/logo-light.png" alt="Logo">
+      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/raw/main/docs/logo-dark.png">
+      <img src="https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/raw/main/docs/logo-light.png" alt="Logo">
     </picture>
   </a>
 
-<h3 align="center">Ben's Terraform AWS Defaults Module</h3>
+<h3 align="center">Ben's Terraform AWS Account Defaults Module</h3>
 
   <p align="center">
     This is how I do it.
@@ -22,62 +22,467 @@
   </p>
 </p>
 
-![Contributors](https://img.shields.io/github/contributors/bendoerr-terraform-modules/terraform-aws-defaults?color=dark-green)
-![Issues](https://img.shields.io/github/issues/bendoerr-terraform-modules/terraform-aws-defaults)
-![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/bendoerr-terraform-modules/terraform-aws-defaults/test.yml)
-![GitHub tag (with filter)](https://img.shields.io/github/v/tag/bendoerr-terraform-modules/terraform-aws-defaults?filter=v*)
-![License](https://img.shields.io/github/license/bendoerr-terraform-modules/terraform-aws-defaults)
+[<img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bendoerr-terraform-modules/terraform-aws-defaults?logo=github">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/graphs/contributors)
+[<img alt="GitHub issues" src="https://img.shields.io/github/issues/bendoerr-terraform-modules/terraform-aws-defaults?logo=github">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/issues)
+[<img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/bendoerr-terraform-modules/terraform-aws-defaults?logo=github">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/pulls)
+[<img alt="GitHub workflow: Terratest" src="https://img.shields.io/github/actions/workflow/status/bendoerr-terraform-modules/terraform-aws-defaults/test.yml?logo=githubactions&label=terratest">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/actions/workflows/test.yml)
+[<img alt="GitHub workflow: Linting" src="https://img.shields.io/github/actions/workflow/status/bendoerr-terraform-modules/terraform-aws-defaults/lint.yml?logo=githubactions&label=linting">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/actions/workflows/lint.yml)
+[<img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/bendoerr-terraform-modules/terraform-aws-defaults?filter=v*&label=latest%20tag&logo=terraform">](https://registry.terraform.io/modules/bendoerr-terraform-modules/defaults/aws/latest)
+[<img alt="OSSF-Scorecard Score" src="https://img.shields.io/ossf-scorecard/github.com/bendoerr-terraform-modules/terraform-aws-defaults?logo=securityscorecard&label=ossf%20scorecard&link=https%3A%2F%2Fsecurityscorecards.dev%2Fviewer%2F%3Furi%3Dgithub.com%2Fbendoerr-terraform-modules%2Fterraform-aws-defaults">](https://securityscorecards.dev/viewer/?uri=github.com/bendoerr-terraform-modules/terraform-aws-defaults)
+[<img alt="GitHub License" src="https://img.shields.io/github/license/bendoerr-terraform-modules/terraform-aws-defaults?logo=opensourceinitiative">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/blob/main/LICENSE.txt)
 
 ## About The Project
 
-My opinionated AWS Defaults module.
+Ben's Terraform AWS Account Defaults Module. Configures various defaults and
+network for your AWS account. Non-optionally sets basic account-wide billing
+alerts to help avoid run-away costs.
+
+### Defaults
+
+- EC2 Serial Console Access ENABLED by Default
+- EBS Default KMS Key set to the AWS Managed KMS Key
+- EBS Encryption ENABLED by Default
+  - 💸 Note potential costs from KMS @
+    [$0.03 per 10,000 requests](https://aws.amazon.com/kms/pricing/)
+- ECS EC2 Provisioned Trunking DISABLED by Default
+- ECS Container Insights ENABLED by Default
+  - 💸 Note potential costs from CloudWatch custom Metrics @
+    [$5.40/Service/Month](https://github.com/bendoerr-terraform-modules/terraform-aws-fargate-on-demand/blob/main/modules/service/ecs-cluster.tf#L7-L21)
+- IAM Allow Users to Change their own Password ENABLED
+- IAM Hard Password Expiry DISABLED
+- IAM Max Password Age 90 Days
+- IAM Min Password Length 32
+- IAM Password Reuse Prevention for the last 5 passwords
+- IAM Password Complexity lowercase, uppercase, numbers, symbols all required
+- VPC User-specified network
+  - 💸🚨Possible configuration costs from NAT Gateways @
+    [$32.85/nat/month](https://aws.amazon.com/vpc/pricing/). See more in the
+    usage and cost sections below.
+  - 💸 Note potential costs from
+    [IPv4 Addresses](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/issues/50)
 
 ## Usage
 
+The basic defaults are straight forward with variations on network configuration
+presenting various options. See the Costs section for the implications of
+network topology on cost.
+
 ```terraform
 module "context" {
-    source  = "bendoerr-terraform-modules/context/null"
-  version = "0.4.1"
-  namespace = "brd"
-  role      = "production'
+  source    = "bendoerr-terraform-modules/context/null"
+  version   = "xxx"
+  namespace = "btm"
+  role      = "production"
   region    = "us-east-1"
-  project   = "example'
+  project   = "defaults"
 }
 
-module "aws_defaults" {
-  source               = "git@github.com:bendoerr-terraform-modules/terraform-aws-defaults?ref=v0.3.0"
-  context              = module.context.shared
-  budget_monthly_limit = 10
+module "defaults" {
+  source  = "bendoerr-terraform-modules/defaults/aws"
+  version = "xxx"
+  context = module.context.shared
+
+  budget_monthly_limit = 10.00
   budget_alert_emails  = "alerts@example.com"
+  iam_alias_postfix    = "core"
+
+  network = {
+    idr           = "10.10.0.0/16"
+    enable_nat     = false
+    one_nat        = false
+    enable_private = false
+    subnets = [
+      {
+        az      = "us-east-1a"
+        public  = "10.10.1.0/24"
+        private = ""
+      },
+    ]
+  }
 }
+
+output "vpc_id" {
+  value = module.defaults.vpc_id
+}
+
+output "vpc_public_subnet_ids" {
+  value = module.defaults.vpc_public_subnet_ids
+}
+```
+
+### Example Network with Public Subnets Only
+
+[![infracost](https://img.shields.io/endpoint?url=https://dashboard.api.infracost.io/shields/json/6e706676-64ba-43db-97b9-bd92f9272474/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c/branch/0641e65d-bfd2-44c8-9eee-c7511ac75eca/With%2520Public%2520Subnets%2520Only)](https://dashboard.infracost.io/org/bendoerr/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c?tab=settings)
+
+For cost, this is my default network configuration. Each ENI assigned within
+this subnet will have an associated IPv4 address attached to it as well. At the
+moment this is the most cost-effective solution as there is no charge for active
+IPv4 address. 🚨 However, starting in February 2024 active IPv4 addresses will
+incur a $0.005/hour charge.
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = false
+  one_nat        = false
+  enable_private = false
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = ""
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.10.2.0/24"
+      private = ""
+    },
+    {
+      az      = "us-east-1c"
+      public  = "10.10.3.0/24"
+      private = ""
+    },
+    {
+      az      = "us-east-1d"
+      public  = "10.10.4.0/24"
+      private = ""
+    },
+    {
+      az      = "us-east-1e"
+      public  = "10.10.5.0/24"
+      private = ""
+    },
+    {
+      az      = "us-east-1f"
+      public  = "10.10.6.0/24"
+      private = ""
+    },
+  ]
+}
+```
+
+At a base level this configuration incurs no cost. However, take note of future
+IPv4 active addresses beginning to cost mention above.
+
+**Important Data Transfer Costs to Keep in Mind:** While the VPC at rest does
+not cost, be sure to estimate Data Transfer OUT from AWS to the Internet which
+is charged at $0.09/GB beyond the first 100GB/per customer for the first
+10TB/month. Also note that IPv4 data transferred between Availability Zones
+within the same region cost $0.01/GB in each direction. IPv6 only incurs this
+cost if transferred to a different VPC.
+
+```text
+Project: With Public Subnets Only
+Module path: examples/complete
+
+ Name  Monthly Qty  Unit  Monthly Cost
+
+ OVERALL TOTAL                   $0.00
+──────────────────────────────────
+27 cloud resources were detected:
+∙ 0 were estimated
+∙ 25 were free, rerun with --show-skipped to see details
+∙ 2 are not supported yet, rerun with --show-skipped to see details
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Project                                            ┃ Monthly cost ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━┫
+┃ With Public Subnets Only                           ┃ $0.00        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━┛
+```
+
+### Example Network with Public & Private Subnets without NAT
+
+If for some reason you would like private subnets without access to the internet
+this configuration can achieve that.
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = false
+  one_nat        = false
+  enable_private = true
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = "10.10.16.0/20"
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.10.2.0/24"
+      private = "10.10.32.0/20"
+    },
+    {
+      az      = "us-east-1c"
+      public  = "10.10.3.0/24"
+      private = "10.10.48.0/20"
+    },
+    {
+      az      = "us-east-1d"
+      public  = "10.10.4.0/24"
+      private = "10.10.64.0/20"
+    },
+    {
+      az      = "us-east-1e"
+      public  = "10.10.5.0/24"
+      private = "10.10.80.0/20"
+    },
+    {
+      az      = "us-east-1f"
+      public  = "10.10.6.0/24"
+      private = "10.10.96.0/20"
+    },
+  ]
+}
+```
+
+[![infracost](https://img.shields.io/endpoint?url=https://dashboard.api.infracost.io/shields/json/6e706676-64ba-43db-97b9-bd92f9272474/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c/branch/0641e65d-bfd2-44c8-9eee-c7511ac75eca/With%2520Public%2520%2526%2520Private%2520Subnets%2520no%252FNAT)](https://dashboard.infracost.io/org/bendoerr/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c?tab=settings)
+
+At a base level this configuration incurs no cost. However, take note of future
+IPv4 active addresses beginning to cost mention above.
+
+**Important Data Transfer Costs to Keep in Mind:** While the VPC at rest does
+not cost, be sure to estimate Data Transfer OUT from AWS to the Internet which
+is charged at $0.09/GB beyond the first 100GB/per customer for the first
+10TB/month. Also note that IPv4 data transferred between Availability Zones
+within the same region cost $0.01/GB in each direction. IPv6 only incurs this
+cost if transferred to a different VPC.
+
+```text
+Project: With Public & Private Subnets no/NAT
+Module path: examples/complete
+
+ Name  Monthly Qty  Unit  Monthly Cost
+
+ OVERALL TOTAL                   $0.00
+──────────────────────────────────
+40 cloud resources were detected:
+∙ 0 were estimated
+∙ 38 were free, rerun with --show-skipped to see details
+∙ 2 are not supported yet, rerun with --show-skipped to see details
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Project                                            ┃ Monthly cost ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━┫
+┃ With Public & Private Subnets no/NAT               ┃ $0.00        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━┛
+```
+
+### Example Network with Public & Private Subnets and a Single NAT
+
+This is a good starter Public/Private network topology which will use a single
+NAT in the first availability zone for all subnets. If you are spreading your
+workload across multiple availability zones for fault tolerance note that in
+this configuration the NAT Gateway becomes a single point of failure for
+outbound traffic.
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = true
+  one_nat        = true
+  enable_private = true
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = "10.10.16.0/20"
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.10.2.0/24"
+      private = "10.10.32.0/20"
+    },
+    {
+      az      = "us-east-1c"
+      public  = "10.10.3.0/24"
+      private = "10.10.48.0/20"
+    },
+    {
+      az      = "us-east-1d"
+      public  = "10.10.4.0/24"
+      private = "10.10.64.0/20"
+    },
+    {
+      az      = "us-east-1e"
+      public  = "10.10.5.0/24"
+      private = "10.10.80.0/20"
+    },
+    {
+      az      = "us-east-1f"
+      public  = "10.10.6.0/24"
+      private = "10.10.96.0/20"
+    },
+  ]
+}
+```
+
+[![infracost](https://img.shields.io/endpoint?url=https://dashboard.api.infracost.io/shields/json/6e706676-64ba-43db-97b9-bd92f9272474/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c/branch/0641e65d-bfd2-44c8-9eee-c7511ac75eca/With%2520Public%2520%2526%2520Private%2520Subnets%2520with%2520one%2520NAT)](https://dashboard.infracost.io/org/bendoerr/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c?tab=settings)
+
+🚨Using a NAT Gateway costs about $32.85/month to exist. Additionally, NAT
+Gateway's charge $0.045/1 GB data processed. There is no charge between the NAT
+Gateway and resources in the same availability zone, however data transfers
+between the NAT Gateway and resources in different availability zones do incur
+standard EC2 data transfer charges.
+
+This cost example assumes 50GB of processed data at the NAT and that 4/5ths of
+that data is being distributed to other availability zones.
+
+```text
+Project: With Public & Private Subnets with one NAT
+Module path: examples/complete
+
+ Name                                                            Monthly Qty  Unit   Monthly Cost
+
+ aws_data_transfer.my_region
+ └─ Intra-region data transfer                                            80  GB            $0.80
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[0]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ OVERALL TOTAL                                                                             $35.90
+──────────────────────────────────
+44 cloud resources were detected:
+∙ 2 were estimated, all of which include usage-based costs, see https://infracost.io/usage-file
+∙ 40 were free, rerun with --show-skipped to see details
+∙ 2 are not supported yet, rerun with --show-skipped to see details
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Project                                            ┃ Monthly cost ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━┫
+┃ With Public & Private Subnets with one NAT         ┃ $36          ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━┛
+```
+
+### Example Network with Public & Private Subnets and a NAT per AZ
+
+This is the more robust Public/Private topology that allows for failed regions
+to not take down NATing.
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = true
+  one_nat        = false
+  enable_private = true
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = "10.10.16.0/20"
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.10.2.0/24"
+      private = "10.10.32.0/20"
+    },
+    {
+      az      = "us-east-1c"
+      public  = "10.10.3.0/24"
+      private = "10.10.48.0/20"
+    },
+    {
+      az      = "us-east-1d"
+      public  = "10.10.4.0/24"
+      private = "10.10.64.0/20"
+    },
+    {
+      az      = "us-east-1e"
+      public  = "10.10.5.0/24"
+      private = "10.10.80.0/20"
+    },
+    {
+      az      = "us-east-1f"
+      public  = "10.10.6.0/24"
+      private = "10.10.96.0/20"
+    },
+  ]
+}
+```
+
+[![infracost](https://img.shields.io/endpoint?url=https://dashboard.api.infracost.io/shields/json/6e706676-64ba-43db-97b9-bd92f9272474/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c/branch/0641e65d-bfd2-44c8-9eee-c7511ac75eca/With%2520Public%2520%2526%2520Private%2520Subnets%2520with%2520NAT%2520per%2520AZ)](https://dashboard.infracost.io/org/bendoerr/repos/4290fbbd-b821-4df7-afde-7addb4d74b8c?tab=settings)
+
+🚨Using a NAT Gateway costs about $32.85/month to exist. Additionally, NAT
+Gateway's charge $0.045/1 GB data processed. There is no charge between the NAT
+Gateway and resources in the same availability zone, however data transfers
+between the NAT Gateway and resources in different availability zones do incur
+standard EC2 data transfer charges.
+
+This cost example assumes 50GB of processed data at the NAT without any need for
+inter-region data transfer.
+
+```text
+Project: With Public & Private Subnets with NAT per AZ
+Module path: examples/complete
+
+ Name                                                            Monthly Qty  Unit   Monthly Cost
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[0]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[1]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[2]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[3]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[4]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ module.aws_defaults.module.vpc_default.aws_nat_gateway.this[5]
+ ├─ NAT gateway                                                          730  hours        $32.85
+ └─ Data processed                                                        50  GB            $2.25
+
+ OVERALL TOTAL                                                                            $210.60
+──────────────────────────────────
+63 cloud resources were detected:
+∙ 6 were estimated, all of which include usage-based costs, see https://infracost.io/usage-file
+∙ 55 were free, rerun with --show-skipped to see details
+∙ 2 are not supported yet, rerun with --show-skipped to see details
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Project                                            ┃ Monthly cost ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━┫
+┃ With Public & Private Subnets with NAT per AZ      ┃ $211         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━┛
 ```
 
 <!-- BEGIN_TF_DOCS -->
 
-## Requirements
+### Requirements
 
 | Name                                                                     | Version |
 | ------------------------------------------------------------------------ | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 0.13 |
 | <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0  |
 
-## Providers
+### Providers
 
 | Name                                             | Version |
 | ------------------------------------------------ | ------- |
-| <a name="provider_aws"></a> [aws](#provider_aws) | ~> 5.0  |
+| <a name="provider_aws"></a> [aws](#provider_aws) | 5.31.0  |
 
-## Modules
+### Modules
 
-| Name                                                                                         | Source                                                           | Version |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------- |
-| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account               | 5.32.0  |
-| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | <git@github.com>:bendoerr-terraform-modules/terraform-null-label | v0.4.0  |
-| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | <git@github.com>:bendoerr-terraform-modules/terraform-null-label | v0.4.0  |
-| <a name="module_label_network"></a> [label_network](#module_label_network)                   | <git@github.com>:bendoerr-terraform-modules/terraform-null-label | v0.4.0  |
-| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                                    | 5.2.0   |
+| Name                                                                                         | Source                                             | Version |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- |
+| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 5.33.0  |
+| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 0.4.1   |
+| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 0.4.1   |
+| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 0.4.1   |
+| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 5.4.0   |
 
-## Resources
+### Resources
 
 | Name                                                                                                                                                          | Type        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -89,17 +494,17 @@ module "aws_defaults" {
 | [aws_ecs_account_setting_default.container_insights](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_account_setting_default) | resource    |
 | [aws_kms_alias.ebs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias)                                                 | data source |
 
-## Inputs
+### Inputs
 
-| Name                                                                                          | Description                                      | Type                                                                                                                                                                                                                                                                                                                      | Default                                                                                                                                                                                                  | Required |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| <a name="input_budget_alert_emails"></a> [budget_alert_emails](#input_budget_alert_emails)    | n/a                                              | `set(string)`                                                                                                                                                                                                                                                                                                             | n/a                                                                                                                                                                                                      |   yes    |
-| <a name="input_budget_monthly_limit"></a> [budget_monthly_limit](#input_budget_monthly_limit) | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                      |   yes    |
-| <a name="input_context"></a> [context](#input_context)                                        | Shared Context from Ben's terraform-null-context | <pre>object({<br> attributes = list(string)<br> dns_namespace = string<br> environment = string<br> instance = string<br> instance_short = string<br> namespace = string<br> region = string<br> region_short = string<br> role = string<br> role_short = string<br> project = string<br> tags = map(string)<br> })</pre> | n/a                                                                                                                                                                                                      |   yes    |
-| <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                      |   yes    |
-| <a name="input_network"></a> [network](#input_network)                                        | n/a                                              | <pre>object({<br> cidr = string<br> enable_nat = bool<br> enable_private = bool<br> subnets = list(object({<br> az = string<br> public = string<br> private = string<br> }))<br> })</pre>                                                                                                                                 | <pre>{<br> "cidr": "0.0.0.0/0",<br> "enable_nat": false,<br> "enable_private": false,<br> "subnets": [<br> {<br> "az": "us-east-1a",<br> "private": "",<br> "public": "0.0.0.0/0"<br> }<br> ]<br>}</pre> |    no    |
+| Name                                                                                          | Description                                      | Type                                                                                                                                                                                                                                                                                                                      | Default                                                                                                                                                                                                                       | Required |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| <a name="input_budget_alert_emails"></a> [budget_alert_emails](#input_budget_alert_emails)    | n/a                                              | `set(string)`                                                                                                                                                                                                                                                                                                             | n/a                                                                                                                                                                                                                           |   yes    |
+| <a name="input_budget_monthly_limit"></a> [budget_monthly_limit](#input_budget_monthly_limit) | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                           |   yes    |
+| <a name="input_context"></a> [context](#input_context)                                        | Shared Context from Ben's terraform-null-context | <pre>object({<br> attributes = list(string)<br> dns_namespace = string<br> environment = string<br> instance = string<br> instance_short = string<br> namespace = string<br> region = string<br> region_short = string<br> role = string<br> role_short = string<br> project = string<br> tags = map(string)<br> })</pre> | n/a                                                                                                                                                                                                                           |   yes    |
+| <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                           |   yes    |
+| <a name="input_network"></a> [network](#input_network)                                        | n/a                                              | <pre>object({<br> cidr = string<br> enable_nat = bool<br> one_nat = bool<br> enable_private = bool<br> subnets = list(object({<br> az = string<br> public = string<br> private = string<br> }))<br> })</pre>                                                                                                              | <pre>{<br> "cidr": "0.0.0.0/0",<br> "enable_nat": false,<br> "enable_private": false,<br> "one_nat": true,<br> "subnets": [<br> {<br> "az": "us-east-1a",<br> "private": "",<br> "public": "0.0.0.0/0"<br> }<br> ]<br>}</pre> |    no    |
 
-## Outputs
+### Outputs
 
 | Name                                                                                                                                                        | Description |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -114,11 +519,15 @@ module "aws_defaults" {
 
 ## Roadmap
 
+[<img alt="GitHub issues" src="https://img.shields.io/github/issues/bendoerr-terraform-modules/terraform-aws-defaults?logo=github">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/issues)
+
 See the
 [open issues](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/issues)
 for a list of proposed features (and known issues).
 
 ## Contributing
+
+[<img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/bendoerr-terraform-modules/terraform-aws-defaults?logo=github">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/pulls)
 
 Contributions are what make the open source community such an amazing place to
 be learn, inspire, and create. Any contributions you make are **greatly
@@ -141,16 +550,31 @@ appreciated**.
 
 ## License
 
+[<img alt="GitHub License" src="https://img.shields.io/github/license/bendoerr-terraform-modules/terraform-aws-defaults?logo=opensourceinitiative">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/blob/main/LICENSE.txt)
+
 Distributed under the MIT License. See
 [LICENSE](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/blob/main/LICENSE.txt)
 for more information.
 
 ## Authors
 
+[<img alt="GitHub contributors" src="https://img.shields.io/github/contributors/bendoerr-terraform-modules/terraform-aws-defaults?logo=github">](https://github.com/bendoerr-terraform-modules/terraform-aws-defaults/graphs/contributors)
+
 - **Benjamin R. Doerr** - _Terraformer_ -
   [Benjamin R. Doerr](https://github.com/bendoerr/) - _Built Ben's Terraform
   Modules_
 
+## Supported Versions
+
+Only the latest tagged version is supported.
+
+## Reporting a Vulnerability
+
+See [SECURITY.md](SECURITY.md).
+
 ## Acknowledgements
 
 - [ShaanCoding (ReadME Generator)](https://github.com/ShaanCoding/ReadME-Generator)
+- [OpenSSF - Helping me follow best practices](https://openssf.org/)
+- [StepSecurity - Helping me follow best practices](https://app.stepsecurity.io/)
+- [Infracost - Better than AWS Calculator](https://www.infracost.io/)
