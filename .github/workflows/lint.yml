@@ -29,6 +29,7 @@ jobs:
           reporter: github-pr-review
           fail_on_error: "false"
           filter_mode: file
+          tflint_version: v0.49.0
           tflint_init: true
           flags: --no-module --recursive
   trivy:
