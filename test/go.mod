@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.26.3
 	github.com/aws/aws-sdk-go-v2/service/budgets v1.20.6
 	github.com/aws/aws-sdk-go-v2/service/iam v1.28.7
-	github.com/gruntwork-io/terratest v0.46.8
+	github.com/gruntwork-io/terratest v0.46.9
 	github.com/kr/pretty v0.3.1
 )
 
