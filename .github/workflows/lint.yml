@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: trivy
-        uses: reviewdog/action-trivy@9a3859cd3808ec7f0555fc52b40def1323cdccca # v1.1.1
+        uses: reviewdog/action-trivy@02cafaef5dd5b6bcbae5b379ba45e91b410bdfc9 # v1.2.2
         with:
           github_token: ${{ github.token }}
           trivy_command: config
@@ -64,7 +64,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@94d61e3205b61acf4ddabfeb13c5f8a13eb4167b # v2.5.0
+        uses: reviewdog/action-golangci-lint@f016e796a429b33094d0da6e86af3fa5479afe65 # v2.5.1
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -166,7 +166,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: actionlint
-        uses: reviewdog/action-actionlint@9ccda195fd3a290c8596db7f1958c897deaa8c76 # v1.40.0
+        uses: reviewdog/action-actionlint@6a38513dd4d2e818798c5c73d0870adbb82de4a4 # v1.41.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
