@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: trivy
-        uses: reviewdog/action-trivy@178338f72109480e6fff51c7f46fc925b8afd571 # v1.3.3
+        uses: reviewdog/action-trivy@f721454c6cd3ba98d7dd503d6e7d71a4ff229ffa # v1.3.5
         with:
           github_token: ${{ github.token }}
           trivy_command: config
