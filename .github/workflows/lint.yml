@@ -44,7 +44,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: trivy
-        uses: reviewdog/action-trivy@178338f72109480e6fff51c7f46fc925b8afd571 # v1.3.3
+        uses: reviewdog/action-trivy@f721454c6cd3ba98d7dd503d6e7d71a4ff229ffa # v1.3.5
         with:
           github_token: ${{ github.token }}
           trivy_command: config
@@ -166,7 +166,7 @@ jobs:
 
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: actionlint
-        uses: reviewdog/action-actionlint@6a38513dd4d2e818798c5c73d0870adbb82de4a4 # v1.41.0
+        uses: reviewdog/action-actionlint@b0a6aebe1d2191decc9b4f022cdfc248b702477d # v1.42.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
