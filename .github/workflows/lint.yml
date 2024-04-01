@@ -105,7 +105,7 @@ jobs:
 
       - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: misspell
-        uses: reviewdog/action-misspell@32cdac969bc45951d79b89420a60c9b0102cf6ed # v1.16.0
+        uses: reviewdog/action-misspell@5bd7be2fc7ae56a517184f5c4bbcf2fd7afe3927 # v1.17.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -146,7 +146,7 @@ jobs:
 
       - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: markdownlint
-        uses: reviewdog/action-markdownlint@6e02140816b5fcc7295ea7ae2a664af18190ff29 # v0.14.0
+        uses: reviewdog/action-markdownlint@7c945172feb13e44779783ebae77cdd185607a7f # v0.17.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
