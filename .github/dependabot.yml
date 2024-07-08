@@ -8,10 +8,11 @@ updates:
     groups:
       terraform:
         update-types:
+          - "major"
           - "minor"
           - "patch"
     commit-message:
-      prefix: "⬆️ (deps-tf):"
+      prefix: "⬆️ tf:"
 
   - package-ecosystem: "gomod"
     directory: "/test"
@@ -24,7 +25,7 @@ updates:
           - "minor"
           - "patch"
     commit-message:
-      prefix: "⬆️ (deps-test):"
+      prefix: "⬆️ test:"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -37,4 +38,4 @@ updates:
           - "minor"
           - "patch"
     commit-message:
-      prefix: "⬆️ (deps-ghaction):"
+      prefix: "⬆️ gha:"
