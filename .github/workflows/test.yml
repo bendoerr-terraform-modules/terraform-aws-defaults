@@ -30,6 +30,6 @@ jobs:
           aws-region: us-east-1
 
       - name: terratest
-        uses: cloudposse/github-action-terratest@2a947b90b7807677d97c539785bb4b5004e6739c # main
+        uses: cloudposse/github-action-terratest@dee3c6c2a6f988c4405965ed69972925a5c3a0b2 # main
         with:
           sourceDir: test
