@@ -5,10 +5,10 @@ go 1.21
 toolchain go1.21.4
 
 require (
-	github.com/aws/aws-sdk-go-v2/config v1.27.30
+	github.com/aws/aws-sdk-go-v2/config v1.27.31
 	github.com/aws/aws-sdk-go-v2/service/budgets v1.25.5
 	github.com/aws/aws-sdk-go-v2/service/iam v1.35.0
-	github.com/gruntwork-io/terratest v0.47.0
+	github.com/gruntwork-io/terratest v0.47.1
 	github.com/kr/pretty v0.3.1
 )
 
@@ -22,7 +22,7 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/aws/aws-sdk-go v1.45.2 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.30.4 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.29 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.30 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.12 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.16 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.16 // indirect
@@ -56,7 +56,7 @@ require (
 	github.com/gruntwork-io/go-commons v0.8.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-getter v1.7.5 // indirect
+	github.com/hashicorp/go-getter v1.7.6 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
