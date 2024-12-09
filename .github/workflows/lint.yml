@@ -17,13 +17,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: tflint
-        uses: reviewdog/action-tflint@0a8c6a4cc8788c02fe181ea6b8530975688f1a33 # v1.23.2
+        uses: reviewdog/action-tflint@f17a66a19220804dfa5ba4912e1a9fe7c530fe0a # v1.24.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -38,13 +38,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: trivy
-        uses: reviewdog/action-trivy@0e0d85c121dfbd91f5325667dc03b047ac86689f # v1.11.3
+        uses: reviewdog/action-trivy@f6878b5e899af1c957abc764c58bd876c4ac57c4 # v1.13.0
         with:
           github_token: ${{ github.token }}
           trivy_command: config
@@ -58,13 +58,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: golangci-lint
-        uses: reviewdog/action-golangci-lint@7708105983c614f7a2725e2172908b7709d1c3e4 # v2.6.2
+        uses: reviewdog/action-golangci-lint@dd3fda91790ca90e75049e5c767509dc0ec7d99b # v2.7.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -78,11 +78,11 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: create package.json
         run: |
           echo -e '{"devDependencies": {"prettier": "^3.1.0"}}' > package.json
@@ -99,13 +99,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: misspell
-        uses: reviewdog/action-misspell@ef8b22c1cca06c8d306fc6be302c3dab0f6ca12f # v1.23.0
+        uses: reviewdog/action-misspell@18ffb61effb93b47e332f185216be7e49592e7e1 # v1.26.1
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -120,13 +120,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: alex
-        uses: reviewdog/action-alex@f95df9e356d97e67e4626f04ad125c4a99a906a9 # v1.13.0
+        uses: reviewdog/action-alex@986cf7dd82e702f82b4173deaa793a849f5b719d # v1.15.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -140,13 +140,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: markdownlint
-        uses: reviewdog/action-markdownlint@e9f3ab4fea1433280a4b0eddca17be1340dfea94 # v0.24.0
+        uses: reviewdog/action-markdownlint@f901468edf9a3634dd39b35ba26cad0aad1a0bfd # v0.26.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
@@ -160,13 +160,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde # v2.9.1
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: actionlint
-        uses: reviewdog/action-actionlint@4f8f9963ca57a41e5fd5b538dd79dbfbd3e0b38a # v1.54.0
+        uses: reviewdog/action-actionlint@08ef4afa963243489a457cca426f705ce4e0d1a5 # v1.60.0
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
