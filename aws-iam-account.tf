@@ -1,13 +1,13 @@
 module "label_account_alias" {
   source  = "bendoerr-terraform-modules/label/null"
-  version = "0.4.2"
+  version = "0.5.0"
   context = var.context
   name    = var.iam_alias_postfix
 }
 
 module "iam_account" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-account"
-  version = "5.44.0"
+  version = "5.60.0"
 
   account_alias = module.label_account_alias.id
 
