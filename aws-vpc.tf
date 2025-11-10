@@ -1,6 +1,6 @@
 module "label_network" {
   source  = "bendoerr-terraform-modules/label/null"
-  version = "0.4.2"
+  version = "0.5.0"
   context = var.context
   name    = "ntwrk"
 }
@@ -11,7 +11,7 @@ locals {
 
 module "vpc_default" {
   source     = "terraform-aws-modules/vpc/aws"
-  version    = "5.13.0"
+  version    = "6.0.1"
   create_vpc = true
 
   name = module.label_network.id
