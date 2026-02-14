@@ -15,21 +15,46 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
           egress-policy: audit
 
-      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-        with:
-          go-version: "1.21.4"
+      - name: "Checkout"
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
+      - name: "Setup Go"
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+        with:
+          go-version-file: test/go.mod
+          cache: true
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd #v3.1.2
+
+      - name: "Configure AWS Credentials"
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         with:
           role-to-assume: arn:aws:iam::234656776442:role/brd-sndbx-ue1-core-apply
           aws-region: us-east-1
 
-      - name: terratest
-        uses: cloudposse/github-action-terratest@f3c07e16b86130b2c264056731b599a5c97f2ecd # main
+      - name: "Install JUnit Reporter"
+        working-directory: test
+        run: go install github.com/jstemmer/go-junit-report/v2@v2.1.0
+
+      - name: "Run Tests"
+        working-directory: test
+        shell: bash
+        run: go test -timeout 20m -v ./... 2>&1 | tee results.out
+
+      - name: "Convert Test Results"
+        working-directory: test
+        shell: bash
+        if: hashFiles('test/results.out') != ''
+        run: go-junit-report -set-exit-code < results.out > results.xml
+
+      - name: "Upload Test Results"
+        uses: test-summary/action@31493c76ec9e7aa675f1585d3ed6f1da69269a86 # v2.4
+        if: hashFiles('test/results.xml') != ''
         with:
-          sourceDir: test
+          paths: test/results.xml
