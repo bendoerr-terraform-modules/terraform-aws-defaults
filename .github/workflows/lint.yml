@@ -27,7 +27,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: true
+          fail_level: error
           filter_mode: file
           tflint_init: true
           flags: --no-module --recursive
@@ -49,7 +49,7 @@ jobs:
           trivy_command: config
           trivy_target: "."
           reporter: github-pr-review
-          fail_on_error: true
+          fail_level: error
           filter_mode: file
   golangci-lint:
     runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: true
+          fail_level: error
           filter_mode: file
           workdir: test/
           go_version_file: test/go.mod
@@ -90,7 +90,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: true
+          fail_level: error
           filter_mode: file
   misspell:
     runs-on: ubuntu-latest
@@ -108,7 +108,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: false
+          fail_level: none
           filter_mode: file
           exclude: |
             ./.git/*
@@ -129,7 +129,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: false
+          fail_level: none
           filter_mode: file
           alex_flags: |
             * .github/* .github/workflows/* docs/* test/* examples/complete/*
@@ -149,7 +149,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: false
+          fail_level: none
           filter_mode: file
   actionlint:
     runs-on: ubuntu-latest
@@ -167,5 +167,5 @@ jobs:
         with:
           github_token: ${{ github.token }}
           reporter: github-pr-review
-          fail_on_error: true
+          fail_level: error
           filter_mode: file
