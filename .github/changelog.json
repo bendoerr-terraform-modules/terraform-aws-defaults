@@ -1,0 +1,28 @@
+{
+  "categories": [
+    {
+      "title": "## ✨ Features",
+      "labels": ["enhancement"]
+    },
+    {
+      "title": "## 🐛 Fixes",
+      "labels": ["bug"]
+    },
+    {
+      "title": "## 🎨 Cleanup",
+      "labels": ["cleanup"]
+    },
+    {
+      "title": "## 👷 CI/CD",
+      "labels": ["cicd"]
+    },
+    {
+      "title": "## 📌 Dependencies",
+      "labels": ["dependencies"]
+    },
+    {
+      "title": "## 📦 Other",
+      "labels": []
+    }
+  ]
+}
