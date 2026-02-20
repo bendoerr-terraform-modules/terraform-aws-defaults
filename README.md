@@ -457,6 +457,136 @@ Module path: examples/complete
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━┛
 ```
 
+## IPv6 Support
+
+This module now supports IPv6 networking through the `ip_mode` variable in the
+network configuration. Three modes are available:
+
+### IPv4 Only (Default)
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = false
+  one_nat        = false
+  enable_private = false
+  ip_mode        = "ipv4"  # Default, can be omitted
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = ""
+    },
+  ]
+}
+```
+
+This is the default behavior with no changes to existing configurations. IPv6
+is disabled and only IPv4 addresses are used.
+
+### Dual-Stack (IPv4 + IPv6)
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = false
+  one_nat        = false
+  enable_private = true
+  ip_mode        = "dual-stack"
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = "10.10.11.0/24"
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.10.2.0/24"
+      private = "10.10.12.0/24"
+    },
+  ]
+}
+```
+
+In dual-stack mode:
+- AWS automatically assigns a `/56` IPv6 CIDR block to the VPC
+- Subnets receive both IPv4 and IPv6 addresses
+- Public subnets get `/64` IPv6 CIDR blocks (prefixes 0, 1, 2, ...)
+- Private subnets get `/64` IPv6 CIDR blocks (prefixes starting after public subnets)
+- Instances automatically receive IPv6 addresses on creation
+- Egress-only Internet Gateway is created for private subnet IPv6 traffic
+- NAT gateway behavior remains unchanged for IPv4 traffic
+
+### IPv6-Only
+
+```terraform
+network = {
+  cidr           = "10.20.0.0/16"
+  enable_nat     = false  # Ignored in IPv6-only mode
+  one_nat        = false  # Ignored in IPv6-only mode
+  enable_private = true
+  ip_mode        = "ipv6-only"
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.20.1.0/24"
+      private = "10.20.11.0/24"
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.20.2.0/24"
+      private = "10.20.12.0/24"
+    },
+  ]
+}
+```
+
+In IPv6-only mode:
+- Subnets use only IPv6 addresses (no IPv4)
+- NAT gateways are automatically disabled (not needed for IPv6)
+- Egress-only Internet Gateway handles outbound IPv6 traffic
+- No IPv4 public address costs
+- **Note:** IPv4 CIDR blocks are still required by AWS but only used for VPC structure
+
+### Migration Guide
+
+**Migrating from IPv4-only to dual-stack:**
+
+1. Add `ip_mode = "dual-stack"` to your network configuration
+2. Run `terraform plan` to review changes
+3. Apply changes - this is a non-breaking change:
+   - Existing IPv4 functionality remains unchanged
+   - IPv6 CIDR blocks are added to VPC and subnets
+   - New resources will receive both IPv4 and IPv6 addresses
+
+**Migrating from dual-stack to IPv6-only:**
+
+⚠️ **This is a breaking change** that will recreate subnets:
+
+1. Update `ip_mode = "ipv6-only"`
+2. Set `enable_nat = false` (NAT gateways not used with IPv6-only)
+3. Understand that:
+   - Existing resources in subnets will need to be recreated
+   - IPv4 addresses will be removed from subnets
+   - Only IPv6 connectivity will be available
+4. Plan for workload migration or maintenance window
+
+**Rolling back:**
+
+To revert from dual-stack or IPv6-only back to IPv4-only:
+- Change `ip_mode = "ipv4"`
+- For IPv6-only → IPv4, expect subnet recreation
+- For dual-stack → IPv4, IPv6 addresses are removed but subnets remain
+
+### IPv6 Outputs
+
+When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available:
+
+- `vpc_ipv6_cidr_block` - The IPv6 CIDR block assigned to the VPC
+- `vpc_public_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for public subnets
+- `vpc_private_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for private subnets  
+- `vpc_egress_only_internet_gateway_id` - ID of the egress-only Internet Gateway
+
 <!-- BEGIN_TF_DOCS -->
 
 ### Requirements

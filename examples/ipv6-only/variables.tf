@@ -137,21 +137,21 @@ variable "network" {
     }))
   })
   default = {
-    cidr           = "10.10.0.0/16"
+    cidr           = "10.20.0.0/16"
     enable_nat     = false
-    one_nat        = true
+    one_nat        = false
     enable_private = true
-    ip_mode        = "dual-stack"
+    ip_mode        = "ipv6-only"
     subnets = [
       {
         az      = "us-east-1a"
-        public  = "10.10.1.0/24"
-        private = "10.10.11.0/24"
+        public  = "10.20.1.0/24"
+        private = "10.20.11.0/24"
       },
       {
         az      = "us-east-1b"
-        public  = "10.10.2.0/24"
-        private = "10.10.12.0/24"
+        public  = "10.20.2.0/24"
+        private = "10.20.12.0/24"
       }
     ]
   }

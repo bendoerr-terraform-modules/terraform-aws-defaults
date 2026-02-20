@@ -9,6 +9,17 @@ locals {
   network_nameless_tags = { for k, v in module.label_network.tags : k => v if k != "Name" }
 }
 
+locals {
+  # IPv6 configuration
+  enable_ipv6            = var.network.ip_mode == "dual-stack" || var.network.ip_mode == "ipv6-only"
+  ipv6_only              = var.network.ip_mode == "ipv6-only"
+  subnet_count           = length(var.network.subnets)
+  public_ipv6_prefixes   = local.enable_ipv6 ? [for i in range(local.subnet_count) : i] : []
+  private_ipv6_prefixes  = local.enable_ipv6 ? [for i in range(local.subnet_count) : i + local.subnet_count] : []
+  enable_nat_for_ipv6    = var.network.enable_nat && !local.ipv6_only
+  create_egress_only_igw = local.enable_ipv6
+}
+
 module "vpc_default" {
   source     = "terraform-aws-modules/vpc/aws"
   version    = "6.6.0"
@@ -29,11 +40,21 @@ module "vpc_default" {
   # NAT Gateways are expensive, between the need for an EIP, the base cost and
   # per GB cost of data, disable them until the private networks actually need
   # to use them.
-  enable_nat_gateway     = var.network.enable_nat
+  # For IPv6-only mode, NAT gateway is not needed as egress-only IGW is used
+  enable_nat_gateway     = local.enable_nat_for_ipv6
   single_nat_gateway     = var.network.one_nat
   one_nat_gateway_per_az = true
   enable_dns_hostnames   = true
-  enable_ipv6            = false
+
+  # IPv6 Configuration
+  enable_ipv6                                    = local.enable_ipv6
+  public_subnet_ipv6_prefixes                    = local.public_ipv6_prefixes
+  private_subnet_ipv6_prefixes                   = local.private_ipv6_prefixes
+  public_subnet_ipv6_native                      = local.ipv6_only
+  private_subnet_ipv6_native                     = local.ipv6_only
+  public_subnet_assign_ipv6_address_on_creation  = local.enable_ipv6
+  private_subnet_assign_ipv6_address_on_creation = local.enable_ipv6
+  create_egress_only_igw                         = local.create_egress_only_igw
 
   public_dedicated_network_acl  = false
   private_dedicated_network_acl = false
@@ -97,4 +118,24 @@ output "vpc_public_subnet_ids" {
 
 output "vpc_private_subnet_ids" {
   value = module.vpc_default.private_subnets
+}
+
+output "vpc_ipv6_cidr_block" {
+  value       = local.enable_ipv6 ? module.vpc_default.vpc_ipv6_cidr_block : null
+  description = "The IPv6 CIDR block assigned to the VPC"
+}
+
+output "vpc_public_subnet_ipv6_cidr_blocks" {
+  value       = local.enable_ipv6 ? module.vpc_default.public_subnets_ipv6_cidr_blocks : []
+  description = "List of IPv6 CIDR blocks for public subnets"
+}
+
+output "vpc_private_subnet_ipv6_cidr_blocks" {
+  value       = local.enable_ipv6 ? module.vpc_default.private_subnets_ipv6_cidr_blocks : []
+  description = "List of IPv6 CIDR blocks for private subnets"
+}
+
+output "vpc_egress_only_internet_gateway_id" {
+  value       = local.create_egress_only_igw ? module.vpc_default.egress_only_internet_gateway_id : null
+  description = "The ID of the egress-only Internet Gateway"
 }
