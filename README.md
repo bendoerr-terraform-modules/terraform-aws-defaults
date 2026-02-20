@@ -544,13 +544,26 @@ network = {
 
 In IPv6-only mode:
 
-- Subnets use only IPv6 addresses (no IPv4)
+- Subnets are configured with `ipv6_native = true` — EC2 instances receive IPv6
+  addresses via DHCPv6 and do not require private IPv4 addresses. The VPC itself
+  still has an IPv4 CIDR block (AWS does not allow removing it), but subnets in
+  this mode do not assign IPv4 addresses to instances on creation.
 - NAT gateways are automatically disabled (not needed for IPv6)
 - Egress-only Internet Gateway handles outbound IPv6 traffic
 - No IPv4 public address costs
-- **Note:** IPv4 CIDR blocks are still required by AWS but only used for VPC structure
+- **Note:** IPv4 CIDR values in the `subnets` configuration are required by the
+  variable schema but are ignored — the VPC module sets `cidr_block = null` for
+  IPv6-native subnets.
 
 ### Migration Guide
+
+> ⚠️ **There is NO in-place migration path from IPv4-only subnets to IPv6-only
+> subnets.** AWS does not support converting an existing IPv4-only subnet to an
+> IPv6-native subnet in place. If you are on `ip_mode = "ipv4"` and want
+> `ip_mode = "ipv6-only"`, you must first migrate to dual-stack (`ip_mode =
+> "dual-stack"`), then to IPv6-only — and the transition to IPv6-only **will
+> recreate your subnets** and any resources inside them. Plan for a maintenance
+> window and workload migration before attempting this.
 
 **Migrating from IPv4-only to dual-stack:**
 

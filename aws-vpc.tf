@@ -16,7 +16,7 @@ locals {
   subnet_count           = length(var.network.subnets)
   public_ipv6_prefixes   = local.enable_ipv6 ? [for i in range(local.subnet_count) : i] : []
   private_ipv6_prefixes  = local.enable_ipv6 ? [for i in range(local.subnet_count) : i + local.subnet_count] : []
-  enable_nat_for_ipv6    = var.network.enable_nat && !local.ipv6_only
+  effective_enable_nat   = var.network.enable_nat && !local.ipv6_only
   create_egress_only_igw = local.enable_ipv6
 }
 
@@ -41,7 +41,7 @@ module "vpc_default" {
   # per GB cost of data, disable them until the private networks actually need
   # to use them.
   # For IPv6-only mode, NAT gateway is not needed as egress-only IGW is used
-  enable_nat_gateway     = local.enable_nat_for_ipv6
+  enable_nat_gateway     = local.effective_enable_nat
   single_nat_gateway     = var.network.one_nat
   one_nat_gateway_per_az = true
   enable_dns_hostnames   = true
@@ -55,6 +55,14 @@ module "vpc_default" {
   public_subnet_assign_ipv6_address_on_creation  = local.enable_ipv6
   private_subnet_assign_ipv6_address_on_creation = local.enable_ipv6
   create_egress_only_igw                         = local.create_egress_only_igw
+
+  # Explicitly disable DNS64 — the vpc module enables it by default when
+  # enable_ipv6 = true (since v4.0.1), but DNS64 silently breaks connectivity
+  # to IPv4-only services when NAT64 is not provisioned. This module does not
+  # provision NAT64, so DNS64 must be disabled to avoid misdirecting DNS
+  # responses toward a non-existent NAT64 gateway.
+  public_subnet_enable_dns64  = false
+  private_subnet_enable_dns64 = false
 
   public_dedicated_network_acl  = false
   private_dedicated_network_acl = false

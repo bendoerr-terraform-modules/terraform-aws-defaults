@@ -143,6 +143,10 @@ variable "network" {
     enable_private = true
     ip_mode        = "ipv6-only"
     subnets = [
+      # Note: the `public` and `private` values below are IPv4 CIDRs required
+      # by the variable schema but are NOT used in IPv6-only mode. The
+      # underlying VPC module sets cidr_block = null for IPv6-native subnets,
+      # so these IPv4 ranges are never assigned to actual subnet resources.
       {
         az      = "us-east-1a"
         public  = "10.20.1.0/24"
