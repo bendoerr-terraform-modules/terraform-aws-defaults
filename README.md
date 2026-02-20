@@ -557,13 +557,17 @@ In IPv6-only mode:
 
 ### Migration Guide
 
-> ⚠️ **There is NO in-place migration path from IPv4-only subnets to IPv6-only
-> subnets.** AWS does not support converting an existing IPv4-only subnet to an
-> IPv6-native subnet in place. If you are on `ip_mode = "ipv4"` and want
-> `ip_mode = "ipv6-only"`, you must first migrate to dual-stack (`ip_mode =
-> "dual-stack"`), then to IPv6-only — and the transition to IPv6-only **will
-> recreate your subnets** and any resources inside them. Plan for a maintenance
-> window and workload migration before attempting this.
+> **Warning:** There is NO in-place migration path from IPv4-only subnets to
+> IPv6-only subnets. AWS does not support converting an existing IPv4-only
+> subnet to an IPv6-native subnet in place.
+>
+> To migrate from `ip_mode = "ipv4"` to `ip_mode = "ipv6-only"` you must:
+>
+> 1. First migrate to dual-stack (`ip_mode = "dual-stack"`)
+> 2. Then switch to `ip_mode = "ipv6-only"` -- this step **will recreate your
+>    subnets** and any resources inside them
+>
+> Plan for a maintenance window and workload migration before attempting this.
 
 **Migrating from IPv4-only to dual-stack:**
 

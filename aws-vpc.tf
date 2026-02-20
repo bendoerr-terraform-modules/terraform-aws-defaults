@@ -56,11 +56,11 @@ module "vpc_default" {
   private_subnet_assign_ipv6_address_on_creation = local.enable_ipv6
   create_egress_only_igw                         = local.create_egress_only_igw
 
-  # Explicitly disable DNS64 — the vpc module enables it by default when
+  # Explicitly turn off DNS64 — the vpc module turns it on by default when
   # enable_ipv6 = true (since v4.0.1), but DNS64 silently breaks connectivity
   # to IPv4-only services when NAT64 is not provisioned. This module does not
-  # provision NAT64, so DNS64 must be disabled to avoid misdirecting DNS
-  # responses toward a non-existent NAT64 gateway.
+  # provision NAT64, so DNS64 must be off to avoid misdirecting DNS responses
+  # toward a non-existent NAT64 gateway.
   public_subnet_enable_dns64  = false
   private_subnet_enable_dns64 = false
 
