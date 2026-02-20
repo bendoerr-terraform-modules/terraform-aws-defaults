@@ -39,7 +39,10 @@ func TestDefaults(t *testing.T) {
 		defer func(accountAlias string) {
 			t.Log("Setting account alias: " + accountAlias)
 			iamSvc = iam.NewFromConfig(cfg)
-			_, err = iamSvc.CreateAccountAlias(context.TODO(), &iam.CreateAccountAliasInput{AccountAlias: &accountAlias})
+			_, err = iamSvc.CreateAccountAlias(
+				context.TODO(),
+				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -117,7 +120,10 @@ func TestDualStack(t *testing.T) {
 		defer func(accountAlias string) {
 			t.Log("Setting account alias: " + accountAlias)
 			iamSvc = iam.NewFromConfig(cfg)
-			_, err = iamSvc.CreateAccountAlias(context.TODO(), &iam.CreateAccountAliasInput{AccountAlias: &accountAlias})
+			_, err = iamSvc.CreateAccountAlias(
+				context.TODO(),
+				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -216,7 +222,10 @@ func TestIPv6Only(t *testing.T) {
 		defer func(accountAlias string) {
 			t.Log("Setting account alias: " + accountAlias)
 			iamSvc = iam.NewFromConfig(cfg)
-			_, err = iamSvc.CreateAccountAlias(context.TODO(), &iam.CreateAccountAliasInput{AccountAlias: &accountAlias})
+			_, err = iamSvc.CreateAccountAlias(
+				context.TODO(),
+				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
