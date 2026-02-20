@@ -159,5 +159,5 @@ variable "network" {
       }
     ]
   }
-  description = ""
+  description = "Network configuration including CIDR, subnets, NAT, and IPv6 ip_mode."
 }
