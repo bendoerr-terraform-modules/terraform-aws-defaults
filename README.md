@@ -509,6 +509,7 @@ network = {
 ```
 
 In dual-stack mode:
+
 - AWS automatically assigns a `/56` IPv6 CIDR block to the VPC
 - Subnets receive both IPv4 and IPv6 addresses
 - Public subnets get `/64` IPv6 CIDR blocks (prefixes 0, 1, 2, ...)
@@ -542,6 +543,7 @@ network = {
 ```
 
 In IPv6-only mode:
+
 - Subnets use only IPv6 addresses (no IPv4)
 - NAT gateways are automatically disabled (not needed for IPv6)
 - Egress-only Internet Gateway handles outbound IPv6 traffic
@@ -574,6 +576,7 @@ In IPv6-only mode:
 **Rolling back:**
 
 To revert from dual-stack or IPv6-only back to IPv4-only:
+
 - Change `ip_mode = "ipv4"`
 - For IPv6-only → IPv4, expect subnet recreation
 - For dual-stack → IPv4, IPv6 addresses are removed but subnets remain
@@ -584,7 +587,7 @@ When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available
 
 - `vpc_ipv6_cidr_block` - The IPv6 CIDR block assigned to the VPC
 - `vpc_public_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for public subnets
-- `vpc_private_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for private subnets  
+- `vpc_private_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for private subnets
 - `vpc_egress_only_internet_gateway_id` - ID of the egress-only Internet Gateway
 
 <!-- BEGIN_TF_DOCS -->
