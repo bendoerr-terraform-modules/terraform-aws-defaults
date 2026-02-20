@@ -516,7 +516,7 @@ In dual-stack mode:
 - Private subnets get `/64` IPv6 CIDR blocks (prefixes starting after public subnets)
 - Instances automatically receive IPv6 addresses on creation
 - Egress-only Internet Gateway is created for private subnet IPv6 traffic
-- NAT gateway behavior remains unchanged for IPv4 traffic
+- NAT gateway behavior is unchanged for IPv4 traffic
 
 ### IPv6-Only
 
@@ -574,7 +574,7 @@ In IPv6-only mode:
 1. Add `ip_mode = "dual-stack"` to your network configuration
 2. Run `terraform plan` to review changes
 3. Apply changes - this is a non-breaking change:
-   - Existing IPv4 functionality remains unchanged
+   - Existing IPv4 functionality is preserved
    - IPv6 CIDR blocks are added to VPC and subnets
    - New resources will receive both IPv4 and IPv6 addresses
 
