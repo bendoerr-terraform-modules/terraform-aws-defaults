@@ -137,23 +137,27 @@ variable "network" {
     }))
   })
   default = {
-    cidr           = "10.10.0.0/16"
+    cidr           = "10.20.0.0/16"
     enable_nat     = false
-    one_nat        = true
+    one_nat        = false
     enable_private = true
-    ip_mode        = "dual-stack"
+    ip_mode        = "ipv6-only"
     subnets = [
+      # Note: the `public` and `private` values below are IPv4 CIDRs required
+      # by the variable schema but are NOT used in IPv6-only mode. The
+      # underlying VPC module sets cidr_block = null for IPv6-native subnets,
+      # so these IPv4 ranges are never assigned to actual subnet resources.
       {
         az      = "us-east-1a"
-        public  = "10.10.1.0/24"
-        private = "10.10.11.0/24"
+        public  = "10.20.1.0/24"
+        private = "10.20.11.0/24"
       },
       {
         az      = "us-east-1b"
-        public  = "10.10.2.0/24"
-        private = "10.10.12.0/24"
+        public  = "10.20.2.0/24"
+        private = "10.20.12.0/24"
       }
     ]
   }
-  description = ""
+  description = "Network configuration including CIDR, subnets, NAT, and IPv6 ip_mode."
 }

@@ -37,6 +37,7 @@ variable "network" {
     enable_nat     = bool
     one_nat        = bool
     enable_private = bool
+    ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
       public  = string
@@ -48,6 +49,7 @@ variable "network" {
     enable_nat     = false
     one_nat        = true
     enable_private = false
+    ip_mode        = "ipv4"
     subnets = [
       {
         az      = "us-east-1a"
@@ -56,5 +58,10 @@ variable "network" {
       }
     ]
   }
-  description = ""
+  description = "Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'."
+
+  validation {
+    condition     = contains(["ipv4", "dual-stack", "ipv6-only"], var.network.ip_mode)
+    error_message = "ip_mode must be one of: ipv4, dual-stack, ipv6-only"
+  }
 }
