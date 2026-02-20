@@ -30,12 +30,12 @@ network = {
   # for IPv6-native subnets, so these IPv4 ranges are never assigned.
   subnets = [
     {
-      az      = "us-east-1a"
+      az      = "us-west-2a"
       public  = "10.20.1.0/24"
       private = "10.20.11.0/24"
     },
     {
-      az      = "us-east-1b"
+      az      = "us-west-2b"
       public  = "10.20.2.0/24"
       private = "10.20.12.0/24"
     },
