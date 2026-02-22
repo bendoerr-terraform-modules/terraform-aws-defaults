@@ -16,11 +16,10 @@ import (
 
 // setupAWSAndPreserveAlias configures an AWS session and sets up a deferred
 // restore of the current IAM account alias so tests leave the account unchanged.
-func setupAWSAndPreserveAlias(t *testing.T, region string) (cfg aws.Config, budgetsSvc *budgets.Client) {
+func setupAWSAndPreserveAlias(t *testing.T, region string) (aws.Config, *budgets.Client) {
 	t.Helper()
 
-	var err error
-	cfg, err = config.LoadDefaultConfig(
+	cfg, err := config.LoadDefaultConfig(
 		context.TODO(),
 		config.WithRegion(region),
 	)
@@ -43,17 +42,17 @@ func setupAWSAndPreserveAlias(t *testing.T, region string) (cfg aws.Config, budg
 		t.Cleanup(func() {
 			t.Log("Setting account alias: " + accountAlias)
 			svc := iam.NewFromConfig(cfg)
-			_, err := svc.CreateAccountAlias(
+			_, createErr := svc.CreateAccountAlias(
 				context.TODO(),
 				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
 			)
-			if err != nil {
-				t.Fatal(err)
+			if createErr != nil {
+				t.Fatal(createErr)
 			}
 		})
 	}
 
-	budgetsSvc = budgets.NewFromConfig(cfg)
+	budgetsSvc := budgets.NewFromConfig(cfg)
 	return cfg, budgetsSvc
 }
 

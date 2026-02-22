@@ -611,10 +611,10 @@ When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available
 
 ### Requirements
 
-| Name                                                                     | Version |
-| ------------------------------------------------------------------------ | ------- |
+| Name                                                                     | Version  |
+| ------------------------------------------------------------------------ | -------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.3.0 |
-| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0  |
+| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0   |
 
 ### Providers
 
