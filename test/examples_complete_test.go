@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/budgets"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -13,18 +14,20 @@ import (
 	"github.com/kr/pretty"
 )
 
-func TestDefaults(t *testing.T) {
-	// AWS Session
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithRegion("us-east-1"),
-	)
+// setupAWSAndPreserveAlias configures an AWS session and sets up a deferred
+// restore of the current IAM account alias so tests leave the account unchanged.
+func setupAWSAndPreserveAlias(t *testing.T, region string) (cfg aws.Config, budgetsSvc *budgets.Client) {
+	t.Helper()
 
+	var err error
+	cfg, err = config.LoadDefaultConfig(
+		context.TODO(),
+		config.WithRegion(region),
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	// Before starting grab the account alias so that we can reset it when done
 	iamSvc := iam.NewFromConfig(cfg)
 	aa, err := iamSvc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
 	if err != nil {
@@ -36,18 +39,26 @@ func TestDefaults(t *testing.T) {
 	}
 
 	if len(aa.AccountAliases) > 0 {
-		defer func(accountAlias string) {
+		accountAlias := aa.AccountAliases[0]
+		t.Cleanup(func() {
 			t.Log("Setting account alias: " + accountAlias)
-			iamSvc = iam.NewFromConfig(cfg)
-			_, err = iamSvc.CreateAccountAlias(
+			svc := iam.NewFromConfig(cfg)
+			_, err := svc.CreateAccountAlias(
 				context.TODO(),
 				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
 			)
 			if err != nil {
 				t.Fatal(err)
 			}
-		}(aa.AccountAliases[0])
+		})
 	}
+
+	budgetsSvc = budgets.NewFromConfig(cfg)
+	return cfg, budgetsSvc
+}
+
+func TestDefaults(t *testing.T) {
+	_, budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
 
 	// Setup terratest
 	rootFolder := "../"
@@ -75,7 +86,6 @@ func TestDefaults(t *testing.T) {
 	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
 	budgetLimit := "1.0"
 
-	budgetsSvc := budgets.NewFromConfig(cfg)
 	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
 		AccountId:  &budgetAccount,
 		BudgetName: &budgetName,
@@ -95,40 +105,7 @@ func TestDefaults(t *testing.T) {
 }
 
 func TestDualStack(t *testing.T) {
-	// AWS Session
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithRegion("us-east-1"),
-	)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Before starting grab the account alias so that we can reset it when done
-	iamSvc := iam.NewFromConfig(cfg)
-	aa, err := iamSvc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(aa.AccountAliases) > 1 {
-		t.Fatal("well that is unexpected")
-	}
-
-	if len(aa.AccountAliases) > 0 {
-		defer func(accountAlias string) {
-			t.Log("Setting account alias: " + accountAlias)
-			iamSvc = iam.NewFromConfig(cfg)
-			_, err = iamSvc.CreateAccountAlias(
-				context.TODO(),
-				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
-		}(aa.AccountAliases[0])
-	}
+	_, budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
 
 	// Setup terratest
 	rootFolder := "../"
@@ -166,10 +143,10 @@ func TestDualStack(t *testing.T) {
 		t.Fatal(makediff("non-empty vpc_private_subnet_ipv6_cidr_blocks", privateIPv6CIDRs))
 	}
 
-	// Dual-stack does not use an egress-only IGW
+	// Dual-stack creates an egress-only IGW for private subnet IPv6 traffic
 	egressOnlyIGW := terraform.Output(t, terraformOptions, "vpc_egress_only_internet_gateway_id")
-	if egressOnlyIGW != "" {
-		t.Fatal(makediff("empty vpc_egress_only_internet_gateway_id", egressOnlyIGW))
+	if egressOnlyIGW == "" {
+		t.Fatal(makediff("non-empty vpc_egress_only_internet_gateway_id", egressOnlyIGW))
 	}
 
 	// Verify the billing budget
@@ -177,7 +154,6 @@ func TestDualStack(t *testing.T) {
 	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
 	budgetLimit := "1.0"
 
-	budgetsSvc := budgets.NewFromConfig(cfg)
 	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
 		AccountId:  &budgetAccount,
 		BudgetName: &budgetName,
@@ -197,40 +173,7 @@ func TestDualStack(t *testing.T) {
 }
 
 func TestIPv6Only(t *testing.T) {
-	// AWS Session
-	cfg, err := config.LoadDefaultConfig(
-		context.TODO(),
-		config.WithRegion("us-east-1"),
-	)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Before starting grab the account alias so that we can reset it when done
-	iamSvc := iam.NewFromConfig(cfg)
-	aa, err := iamSvc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if len(aa.AccountAliases) > 1 {
-		t.Fatal("well that is unexpected")
-	}
-
-	if len(aa.AccountAliases) > 0 {
-		defer func(accountAlias string) {
-			t.Log("Setting account alias: " + accountAlias)
-			iamSvc = iam.NewFromConfig(cfg)
-			_, err = iamSvc.CreateAccountAlias(
-				context.TODO(),
-				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
-			)
-			if err != nil {
-				t.Fatal(err)
-			}
-		}(aa.AccountAliases[0])
-	}
+	_, budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
 
 	// Setup terratest
 	rootFolder := "../"
@@ -262,6 +205,12 @@ func TestIPv6Only(t *testing.T) {
 		t.Fatal(makediff("non-empty vpc_public_subnet_ipv6_cidr_blocks", publicIPv6CIDRs))
 	}
 
+	// Verify private subnets have IPv6 CIDRs
+	privateIPv6CIDRs := terraform.OutputList(t, terraformOptions, "vpc_private_subnet_ipv6_cidr_blocks")
+	if len(privateIPv6CIDRs) == 0 {
+		t.Fatal(makediff("non-empty vpc_private_subnet_ipv6_cidr_blocks", privateIPv6CIDRs))
+	}
+
 	// Verify egress-only IGW is created (IPv6-only mode)
 	egressOnlyIGW := terraform.Output(t, terraformOptions, "vpc_egress_only_internet_gateway_id")
 	if egressOnlyIGW == "" {
@@ -273,7 +222,6 @@ func TestIPv6Only(t *testing.T) {
 	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
 	budgetLimit := "1.0"
 
-	budgetsSvc := budgets.NewFromConfig(cfg)
 	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
 		AccountId:  &budgetAccount,
 		BudgetName: &budgetName,

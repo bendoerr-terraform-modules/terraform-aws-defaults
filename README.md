@@ -586,7 +586,7 @@ In IPv6-only mode:
 2. Set `enable_nat = false` (NAT gateways not used with IPv6-only)
 3. Understand that:
    - Existing resources in subnets will need to be recreated
-   - IPv4 addresses will be removed from subnets
+   - Instances will no longer receive private IPv4 addresses on launch (subnet IPv4 CIDR blocks are retained; AWS does not allow removing them)
    - Only IPv6 connectivity will be available
 4. Plan for workload migration or maintenance window
 
@@ -613,7 +613,7 @@ When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available
 
 | Name                                                                     | Version |
 | ------------------------------------------------------------------------ | ------- |
-| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 0.13 |
+| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.3.0 |
 | <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0  |
 
 ### Providers
