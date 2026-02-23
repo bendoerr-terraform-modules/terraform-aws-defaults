@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/budgets"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -16,7 +15,7 @@ import (
 
 // setupAWSAndPreserveAlias configures an AWS session and sets up a deferred
 // restore of the current IAM account alias so tests leave the account unchanged.
-func setupAWSAndPreserveAlias(t *testing.T, region string) (aws.Config, *budgets.Client) {
+func setupAWSAndPreserveAlias(t *testing.T, region string) *budgets.Client {
 	t.Helper()
 
 	cfg, err := config.LoadDefaultConfig(
@@ -53,11 +52,11 @@ func setupAWSAndPreserveAlias(t *testing.T, region string) (aws.Config, *budgets
 	}
 
 	budgetsSvc := budgets.NewFromConfig(cfg)
-	return cfg, budgetsSvc
+	return budgetsSvc
 }
 
 func TestDefaults(t *testing.T) {
-	_, budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
+	budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
 
 	// Setup terratest
 	rootFolder := "../"
@@ -85,7 +84,7 @@ func TestDefaults(t *testing.T) {
 }
 
 func TestDualStack(t *testing.T) {
-	_, budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
+	budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
 
 	// Setup terratest
 	rootFolder := "../"
@@ -134,7 +133,7 @@ func TestDualStack(t *testing.T) {
 }
 
 func TestIPv6Only(t *testing.T) {
-	_, budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
+	budgetsSvc := setupAWSAndPreserveAlias(t, "us-east-1")
 
 	// Setup terratest
 	rootFolder := "../"
