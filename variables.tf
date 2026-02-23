@@ -40,8 +40,8 @@ variable "network" {
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
-      public  = string
-      private = string
+      public  = optional(string, null)
+      private = optional(string, null)
     }))
   })
   default = {
@@ -52,9 +52,8 @@ variable "network" {
     ip_mode        = "ipv4"
     subnets = [
       {
-        az      = "us-east-1a"
-        public  = "0.0.0.0/0"
-        private = ""
+        az     = "us-east-1a"
+        public = "0.0.0.0/0"
       }
     ]
   }

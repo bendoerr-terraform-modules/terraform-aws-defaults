@@ -30,8 +30,8 @@ module "vpc_default" {
 
   cidr            = var.network.cidr
   azs             = var.network.subnets.*.az
-  public_subnets  = var.network.subnets.*.public
-  private_subnets = var.network.enable_private ? var.network.subnets.*.private : []
+  public_subnets  = [for s in var.network.subnets : s.public if s.public != null]
+  private_subnets = var.network.enable_private ? [for s in var.network.subnets : s.private if s.private != null] : []
 
   public_subnet_suffix  = "public"
   private_subnet_suffix = "private"

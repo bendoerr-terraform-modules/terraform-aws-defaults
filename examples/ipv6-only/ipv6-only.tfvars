@@ -17,7 +17,7 @@ tags = {
 iam_alias_postfix = "testing-sandbox"
 
 budget_monthly_limit = 1
-budget_alert_emails  = ["craftsman@bendoerr.me"]
+budget_alert_emails  = ["alerts@example.com"]
 
 network = {
   cidr           = "10.20.0.0/16"
@@ -25,19 +25,12 @@ network = {
   one_nat        = false
   enable_private = true
   ip_mode        = "ipv6-only"
-  # Note: public/private CIDRs are required by the variable schema but are NOT
-  # used in IPv6-only mode. The underlying VPC module sets cidr_block = null
-  # for IPv6-native subnets, so these IPv4 ranges are never assigned.
   subnets = [
     {
-      az      = "us-west-2a"
-      public  = "10.20.1.0/24"
-      private = "10.20.11.0/24"
+      az = "us-west-2a"
     },
     {
-      az      = "us-west-2b"
-      public  = "10.20.2.0/24"
-      private = "10.20.12.0/24"
+      az = "us-west-2b"
     },
   ]
 }

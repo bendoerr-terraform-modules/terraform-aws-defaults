@@ -80,27 +80,8 @@ func TestDefaults(t *testing.T) {
 
 	pretty.Print(terraform.OutputAll(t, terraformOptions))
 
-	// Start by checking the billing budgets
-	budgetName := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_name")
-	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
-	budgetLimit := "1.0"
-
-	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
-		AccountId:  &budgetAccount,
-		BudgetName: &budgetName,
-	})
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if budgetDesc.Budget.BudgetType != "COST" {
-		t.Fatal(makediff(budgetName, budgetDesc.Budget.BudgetType))
-	}
-
-	if *budgetDesc.Budget.BudgetLimit.Amount != budgetLimit {
-		t.Fatal(makediff(budgetLimit, *budgetDesc.Budget.BudgetLimit.Amount))
-	}
+	// Verify the billing budget
+	assertBudget(t, budgetsSvc, terraformOptions, "1.0")
 }
 
 func TestDualStack(t *testing.T) {
@@ -149,26 +130,7 @@ func TestDualStack(t *testing.T) {
 	}
 
 	// Verify the billing budget
-	budgetName := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_name")
-	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
-	budgetLimit := "1.0"
-
-	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
-		AccountId:  &budgetAccount,
-		BudgetName: &budgetName,
-	})
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if budgetDesc.Budget.BudgetType != "COST" {
-		t.Fatal(makediff("COST", budgetDesc.Budget.BudgetType))
-	}
-
-	if *budgetDesc.Budget.BudgetLimit.Amount != budgetLimit {
-		t.Fatal(makediff(budgetLimit, *budgetDesc.Budget.BudgetLimit.Amount))
-	}
+	assertBudget(t, budgetsSvc, terraformOptions, "1.0")
 }
 
 func TestIPv6Only(t *testing.T) {
@@ -217,9 +179,14 @@ func TestIPv6Only(t *testing.T) {
 	}
 
 	// Verify the billing budget
+	assertBudget(t, budgetsSvc, terraformOptions, "1.0")
+}
+
+func assertBudget(t *testing.T, budgetsSvc *budgets.Client, terraformOptions *terraform.Options, expectedLimit string) {
+	t.Helper()
+
 	budgetName := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_name")
 	budgetAccount := terraform.Output(t, terraformOptions, "aws_budgets_budget_monthly_total_account")
-	budgetLimit := "1.0"
 
 	budgetDesc, err := budgetsSvc.DescribeBudget(context.TODO(), &budgets.DescribeBudgetInput{
 		AccountId:  &budgetAccount,
@@ -234,8 +201,8 @@ func TestIPv6Only(t *testing.T) {
 		t.Fatal(makediff("COST", budgetDesc.Budget.BudgetType))
 	}
 
-	if *budgetDesc.Budget.BudgetLimit.Amount != budgetLimit {
-		t.Fatal(makediff(budgetLimit, *budgetDesc.Budget.BudgetLimit.Amount))
+	if *budgetDesc.Budget.BudgetLimit.Amount != expectedLimit {
+		t.Fatal(makediff(expectedLimit, *budgetDesc.Budget.BudgetLimit.Amount))
 	}
 }
 

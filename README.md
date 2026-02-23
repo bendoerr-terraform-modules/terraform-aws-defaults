@@ -523,8 +523,8 @@ In dual-stack mode:
 ```terraform
 network = {
   cidr           = "10.20.0.0/16"
-  enable_nat     = false  # Ignored in IPv6-only mode
-  one_nat        = false  # Ignored in IPv6-only mode
+  enable_nat     = false  # Forced to false in IPv6-only mode regardless of user value
+  one_nat        = false  # Forced to false in IPv6-only mode regardless of user value
   enable_private = true
   ip_mode        = "ipv6-only"
   subnets = [
@@ -609,30 +609,30 @@ When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available
 
 <!-- BEGIN_TF_DOCS -->
 
-### Requirements
+## Requirements
 
 | Name                                                                     | Version  |
 | ------------------------------------------------------------------------ | -------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.3.0 |
-| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0   |
+| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 6.0   |
 
-### Providers
+## Providers
 
 | Name                                             | Version |
 | ------------------------------------------------ | ------- |
-| <a name="provider_aws"></a> [aws](#provider_aws) | 5.31.0  |
+| <a name="provider_aws"></a> [aws](#provider_aws) | ~> 6.0  |
 
-### Modules
+## Modules
 
 | Name                                                                                         | Source                                             | Version |
 | -------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- |
-| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 5.33.0  |
-| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 0.4.1   |
-| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 0.4.1   |
-| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 0.4.1   |
-| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 5.4.0   |
+| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 6.4.0   |
+| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 0.5.0   |
+| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 0.5.0   |
+| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 0.5.0   |
+| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 6.6.0   |
 
-### Resources
+## Resources
 
 | Name                                                                                                                                                          | Type        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -644,26 +644,30 @@ When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available
 | [aws_ecs_account_setting_default.container_insights](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_account_setting_default) | resource    |
 | [aws_kms_alias.ebs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias)                                                 | data source |
 
-### Inputs
+## Inputs
 
-| Name                                                                                          | Description                                      | Type                                                                                                                                                                                                                                                                                                                      | Default                                                                                                                                                                                                                       | Required |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| <a name="input_budget_alert_emails"></a> [budget_alert_emails](#input_budget_alert_emails)    | n/a                                              | `set(string)`                                                                                                                                                                                                                                                                                                             | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_budget_monthly_limit"></a> [budget_monthly_limit](#input_budget_monthly_limit) | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_context"></a> [context](#input_context)                                        | Shared Context from Ben's terraform-null-context | <pre>object({<br> attributes = list(string)<br> dns_namespace = string<br> environment = string<br> instance = string<br> instance_short = string<br> namespace = string<br> region = string<br> region_short = string<br> role = string<br> role_short = string<br> project = string<br> tags = map(string)<br> })</pre> | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_network"></a> [network](#input_network)                                        | n/a                                              | <pre>object({<br> cidr = string<br> enable_nat = bool<br> one_nat = bool<br> enable_private = bool<br> subnets = list(object({<br> az = string<br> public = string<br> private = string<br> }))<br> })</pre>                                                                                                              | <pre>{<br> "cidr": "0.0.0.0/0",<br> "enable_nat": false,<br> "enable_private": false,<br> "one_nat": true,<br> "subnets": [<br> {<br> "az": "us-east-1a",<br> "private": "",<br> "public": "0.0.0.0/0"<br> }<br> ]<br>}</pre> |    no    |
+| Name                                                                                          | Description                                                                                   | Type                                                                                                                                                                                                                                                                                                                      | Default                                                                                                                                                                                                                           | Required |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| <a name="input_budget_alert_emails"></a> [budget_alert_emails](#input_budget_alert_emails)    | n/a                                                                                           | `set(string)`                                                                                                                                                                                                                                                                                                             | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_budget_monthly_limit"></a> [budget_monthly_limit](#input_budget_monthly_limit) | n/a                                                                                           | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_context"></a> [context](#input_context)                                        | Shared Context from Ben's terraform-null-context                                              | <pre>object({<br> attributes = list(string)<br> dns_namespace = string<br> environment = string<br> instance = string<br> instance_short = string<br> namespace = string<br> region = string<br> region_short = string<br> role = string<br> role_short = string<br> project = string<br> tags = map(string)<br> })</pre> | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                                                                           | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_network"></a> [network](#input_network)                                        | Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'. | <pre>object({<br> cidr = string<br> enable_nat = bool<br> one_nat = bool<br> enable_private = bool<br> ip_mode = optional(string, "ipv4")<br> subnets = list(object({<br> az = string<br> public = optional(string, null)<br> private = optional(string, null)<br> }))<br> })</pre>                                       | <pre>{<br> "cidr": "0.0.0.0/0",<br> "enable_nat": false,<br> "enable_private": false,<br> "ip_mode": "ipv4",<br> "one_nat": true,<br> "subnets": [<br> {<br> "az": "us-east-1a",<br> "public": "0.0.0.0/0"<br> }<br> ]<br>}</pre> |    no    |
 
-### Outputs
+## Outputs
 
-| Name                                                                                                                                                        | Description |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| <a name="output_aws_budgets_budget_monthly_total_account"></a> [aws_budgets_budget_monthly_total_account](#output_aws_budgets_budget_monthly_total_account) | n/a         |
-| <a name="output_aws_budgets_budget_monthly_total_name"></a> [aws_budgets_budget_monthly_total_name](#output_aws_budgets_budget_monthly_total_name)          | n/a         |
-| <a name="output_vpc_azs"></a> [vpc_azs](#output_vpc_azs)                                                                                                    | n/a         |
-| <a name="output_vpc_id"></a> [vpc_id](#output_vpc_id)                                                                                                       | n/a         |
-| <a name="output_vpc_private_subnet_ids"></a> [vpc_private_subnet_ids](#output_vpc_private_subnet_ids)                                                       | n/a         |
-| <a name="output_vpc_public_subnet_ids"></a> [vpc_public_subnet_ids](#output_vpc_public_subnet_ids)                                                          | n/a         |
+| Name                                                                                                                                                        | Description                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| <a name="output_aws_budgets_budget_monthly_total_account"></a> [aws_budgets_budget_monthly_total_account](#output_aws_budgets_budget_monthly_total_account) | n/a                                          |
+| <a name="output_aws_budgets_budget_monthly_total_name"></a> [aws_budgets_budget_monthly_total_name](#output_aws_budgets_budget_monthly_total_name)          | n/a                                          |
+| <a name="output_vpc_azs"></a> [vpc_azs](#output_vpc_azs)                                                                                                    | n/a                                          |
+| <a name="output_vpc_egress_only_internet_gateway_id"></a> [vpc_egress_only_internet_gateway_id](#output_vpc_egress_only_internet_gateway_id)                | The ID of the egress-only Internet Gateway   |
+| <a name="output_vpc_id"></a> [vpc_id](#output_vpc_id)                                                                                                       | n/a                                          |
+| <a name="output_vpc_ipv6_cidr_block"></a> [vpc_ipv6_cidr_block](#output_vpc_ipv6_cidr_block)                                                                | The IPv6 CIDR block assigned to the VPC      |
+| <a name="output_vpc_private_subnet_ids"></a> [vpc_private_subnet_ids](#output_vpc_private_subnet_ids)                                                       | n/a                                          |
+| <a name="output_vpc_private_subnet_ipv6_cidr_blocks"></a> [vpc_private_subnet_ipv6_cidr_blocks](#output_vpc_private_subnet_ipv6_cidr_blocks)                | List of IPv6 CIDR blocks for private subnets |
+| <a name="output_vpc_public_subnet_ids"></a> [vpc_public_subnet_ids](#output_vpc_public_subnet_ids)                                                          | n/a                                          |
+| <a name="output_vpc_public_subnet_ipv6_cidr_blocks"></a> [vpc_public_subnet_ipv6_cidr_blocks](#output_vpc_public_subnet_ipv6_cidr_blocks)                   | List of IPv6 CIDR blocks for public subnets  |
 
 <!-- END_TF_DOCS -->
 
