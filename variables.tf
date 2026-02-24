@@ -63,4 +63,21 @@ variable "network" {
     condition     = contains(["ipv4", "dual-stack", "ipv6-only"], var.network.ip_mode)
     error_message = "ip_mode must be one of: ipv4, dual-stack, ipv6-only"
   }
+
+  validation {
+    condition = (
+      var.network.ip_mode == "ipv6-only" ||
+      alltrue([for s in var.network.subnets : s.public != null])
+    )
+    error_message = "All subnets must have a non-null 'public' CIDR when ip_mode is 'ipv4' or 'dual-stack'."
+  }
+
+  validation {
+    condition = (
+      !var.network.enable_private ||
+      var.network.ip_mode == "ipv6-only" ||
+      alltrue([for s in var.network.subnets : s.private != null])
+    )
+    error_message = "All subnets must have a non-null 'private' CIDR when enable_private is true and ip_mode is not 'ipv6-only'."
+  }
 }

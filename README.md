@@ -529,14 +529,10 @@ network = {
   ip_mode        = "ipv6-only"
   subnets = [
     {
-      az      = "us-east-1a"
-      public  = "10.20.1.0/24"
-      private = "10.20.11.0/24"
+      az = "us-east-1a"
     },
     {
-      az      = "us-east-1b"
-      public  = "10.20.2.0/24"
-      private = "10.20.12.0/24"
+      az = "us-east-1b"
     },
   ]
 }
@@ -551,8 +547,9 @@ In IPv6-only mode:
 - NAT gateways are automatically disabled (not needed for IPv6)
 - Egress-only Internet Gateway handles outbound IPv6 traffic
 - No IPv4 public address costs
-- **Note:** IPv4 CIDR values in the `subnets` configuration are required by the
-  variable schema but are ignored — the VPC module sets `cidr_block = null` for
+- **Note:** IPv4 CIDRs (`public` and `private`) are optional (default to `null`)
+  and are only used in `ipv4` or `dual-stack` modes. In `ipv6-only` mode they
+  can be omitted entirely — the VPC module sets `cidr_block = null` for
   IPv6-native subnets.
 
 ### Migration Guide

@@ -132,8 +132,8 @@ variable "network" {
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
-      public  = string
-      private = string
+      public  = optional(string, null)
+      private = optional(string, null)
     }))
   })
   default = {
@@ -143,19 +143,11 @@ variable "network" {
     enable_private = true
     ip_mode        = "ipv6-only"
     subnets = [
-      # Note: the `public` and `private` values below are IPv4 CIDRs required
-      # by the variable schema but are NOT used in IPv6-only mode. The
-      # underlying VPC module sets cidr_block = null for IPv6-native subnets,
-      # so these IPv4 ranges are never assigned to actual subnet resources.
       {
-        az      = "us-east-1a"
-        public  = "10.20.1.0/24"
-        private = "10.20.11.0/24"
+        az = "us-east-1a"
       },
       {
-        az      = "us-east-1b"
-        public  = "10.20.2.0/24"
-        private = "10.20.12.0/24"
+        az = "us-east-1b"
       }
     ]
   }
