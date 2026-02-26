@@ -482,7 +482,7 @@ network = {
 ```
 
 This is the default behavior with no changes to existing configurations. IPv6
-is disabled and only IPv4 addresses are used.
+is not enabled and only IPv4 addresses are used.
 
 ### Dual-Stack (IPv4 + IPv6)
 
@@ -544,7 +544,7 @@ In IPv6-only mode:
   addresses via DHCPv6 and do not require private IPv4 addresses. The VPC itself
   still has an IPv4 CIDR block (AWS does not allow removing it), but subnets in
   this mode do not assign IPv4 addresses to instances on creation.
-- NAT gateways are automatically disabled (not needed for IPv6)
+- NAT gateways are automatically turned off (not needed for IPv6)
 - Egress-only Internet Gateway handles outbound IPv6 traffic
 - No IPv4 public address costs
 - **Note:** IPv4 CIDRs (`public` and `private`) are optional (default to `null`)

@@ -11,13 +11,19 @@ locals {
 
 locals {
   # IPv6 configuration
-  enable_ipv6            = var.network.ip_mode == "dual-stack" || var.network.ip_mode == "ipv6-only"
-  ipv6_only              = var.network.ip_mode == "ipv6-only"
-  subnet_count           = length(var.network.subnets)
-  public_ipv6_prefixes   = local.enable_ipv6 ? [for i in range(local.subnet_count) : i] : []
-  private_ipv6_prefixes  = local.enable_ipv6 ? [for i in range(local.subnet_count) : i + local.subnet_count] : []
-  effective_enable_nat   = var.network.enable_nat && !local.ipv6_only
-  create_egress_only_igw = local.enable_ipv6
+  enable_ipv6           = var.network.ip_mode == "dual-stack" || var.network.ip_mode == "ipv6-only"
+  ipv6_only             = var.network.ip_mode == "ipv6-only"
+  subnet_count          = length(var.network.subnets)
+  public_ipv6_prefixes  = local.enable_ipv6 ? [for i in range(local.subnet_count) : i] : []
+  private_ipv6_prefixes = local.enable_ipv6 && var.network.enable_private ? [for i in range(local.subnet_count) : i + local.subnet_count] : []
+
+  # In IPv6-only mode, subnets don't need IPv4 CIDRs but the vpc module uses
+  # list length to determine how many subnets to create. Generate placeholder
+  # CIDRs that will be nulled out by ipv6_native = true.
+  ipv6_only_placeholder_public  = [for i, s in var.network.subnets : cidrsubnet(var.network.cidr, 8, i)]
+  ipv6_only_placeholder_private = [for i, s in var.network.subnets : cidrsubnet(var.network.cidr, 8, i + 128)]
+  effective_enable_nat          = var.network.enable_nat && !local.ipv6_only
+  create_egress_only_igw        = local.enable_ipv6
 }
 
 module "vpc_default" {
@@ -30,8 +36,8 @@ module "vpc_default" {
 
   cidr            = var.network.cidr
   azs             = var.network.subnets.*.az
-  public_subnets  = [for s in var.network.subnets : s.public if s.public != null]
-  private_subnets = var.network.enable_private ? [for s in var.network.subnets : s.private if s.private != null] : []
+  public_subnets  = local.ipv6_only ? local.ipv6_only_placeholder_public : [for s in var.network.subnets : s.public if s.public != null]
+  private_subnets = !var.network.enable_private ? [] : (local.ipv6_only ? local.ipv6_only_placeholder_private : [for s in var.network.subnets : s.private if s.private != null])
 
   public_subnet_suffix  = "public"
   private_subnet_suffix = "private"
