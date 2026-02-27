@@ -457,32 +457,179 @@ Module path: examples/complete
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━┛
 ```
 
+## IPv6 Support
+
+This module now supports IPv6 networking through the `ip_mode` variable in the
+network configuration. Three modes are available:
+
+### IPv4 Only (Default)
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = false
+  one_nat        = false
+  enable_private = false
+  ip_mode        = "ipv4"  # Default, can be omitted
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = ""
+    },
+  ]
+}
+```
+
+This is the default behavior with no changes to existing configurations. IPv6
+is not enabled and only IPv4 addresses are used.
+
+### Dual-Stack (IPv4 + IPv6)
+
+```terraform
+network = {
+  cidr           = "10.10.0.0/16"
+  enable_nat     = false
+  one_nat        = false
+  enable_private = true
+  ip_mode        = "dual-stack"
+  subnets = [
+    {
+      az      = "us-east-1a"
+      public  = "10.10.1.0/24"
+      private = "10.10.11.0/24"
+    },
+    {
+      az      = "us-east-1b"
+      public  = "10.10.2.0/24"
+      private = "10.10.12.0/24"
+    },
+  ]
+}
+```
+
+In dual-stack mode:
+
+- AWS automatically assigns a `/56` IPv6 CIDR block to the VPC
+- Subnets receive both IPv4 and IPv6 addresses
+- Public subnets get `/64` IPv6 CIDR blocks (prefixes 0, 1, 2, ...)
+- Private subnets get `/64` IPv6 CIDR blocks (prefixes starting after public subnets)
+- Instances automatically receive IPv6 addresses on creation
+- Egress-only Internet Gateway is created for private subnet IPv6 traffic
+- NAT gateway behavior is unchanged for IPv4 traffic
+
+### IPv6-Only
+
+```terraform
+network = {
+  cidr           = "10.20.0.0/16"
+  enable_nat     = false  # Forced to false in IPv6-only mode regardless of user value
+  one_nat        = false  # Forced to false in IPv6-only mode regardless of user value
+  enable_private = true
+  ip_mode        = "ipv6-only"
+  subnets = [
+    {
+      az = "us-east-1a"
+    },
+    {
+      az = "us-east-1b"
+    },
+  ]
+}
+```
+
+In IPv6-only mode:
+
+- Subnets are configured with `ipv6_native = true` — EC2 instances receive IPv6
+  addresses via DHCPv6 and do not require private IPv4 addresses. The VPC itself
+  still has an IPv4 CIDR block (AWS does not allow removing it), but subnets in
+  this mode do not assign IPv4 addresses to instances on creation.
+- NAT gateways are automatically turned off (not needed for IPv6)
+- Egress-only Internet Gateway handles outbound IPv6 traffic
+- No IPv4 public address costs
+- **Note:** IPv4 CIDRs (`public` and `private`) are optional (default to `null`)
+  and are only used in `ipv4` or `dual-stack` modes. In `ipv6-only` mode they
+  can be omitted entirely — the VPC module sets `cidr_block = null` for
+  IPv6-native subnets.
+
+### Migration Guide
+
+> **Warning:** There is NO in-place migration path from IPv4-only subnets to
+> IPv6-only subnets. AWS does not support converting an existing IPv4-only
+> subnet to an IPv6-native subnet in place.
+>
+> To migrate from `ip_mode = "ipv4"` to `ip_mode = "ipv6-only"` you must:
+>
+> 1. First migrate to dual-stack (`ip_mode = "dual-stack"`)
+> 2. Then switch to `ip_mode = "ipv6-only"` -- this step **will recreate your
+>    subnets** and any resources inside them
+>
+> Plan for a maintenance window and workload migration before attempting this.
+
+**Migrating from IPv4-only to dual-stack:**
+
+1. Add `ip_mode = "dual-stack"` to your network configuration
+2. Run `terraform plan` to review changes
+3. Apply changes - this is a non-breaking change:
+   - Existing IPv4 functionality is preserved
+   - IPv6 CIDR blocks are added to VPC and subnets
+   - New resources will receive both IPv4 and IPv6 addresses
+
+**Migrating from dual-stack to IPv6-only:**
+
+⚠️ **This is a breaking change** that will recreate subnets:
+
+1. Update `ip_mode = "ipv6-only"`
+2. Set `enable_nat = false` (NAT gateways not used with IPv6-only)
+3. Understand that:
+   - Existing resources in subnets will need to be recreated
+   - Instances will no longer receive private IPv4 addresses on launch (subnet IPv4 CIDR blocks are retained; AWS does not allow removing them)
+   - Only IPv6 connectivity will be available
+4. Plan for workload migration or maintenance window
+
+**Rolling back:**
+
+To revert from dual-stack or IPv6-only back to IPv4-only:
+
+- Change `ip_mode = "ipv4"`
+- For IPv6-only → IPv4, expect subnet recreation
+- For dual-stack → IPv4, IPv6 addresses are removed but subnets remain
+
+### IPv6 Outputs
+
+When IPv6 is enabled (dual-stack or IPv6-only), additional outputs are available:
+
+- `vpc_ipv6_cidr_block` - The IPv6 CIDR block assigned to the VPC
+- `vpc_public_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for public subnets
+- `vpc_private_subnet_ipv6_cidr_blocks` - List of IPv6 CIDR blocks for private subnets
+- `vpc_egress_only_internet_gateway_id` - ID of the egress-only Internet Gateway
+
 <!-- BEGIN_TF_DOCS -->
 
-### Requirements
+## Requirements
 
-| Name                                                                     | Version |
-| ------------------------------------------------------------------------ | ------- |
-| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 0.13 |
-| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 5.0  |
+| Name                                                                     | Version  |
+| ------------------------------------------------------------------------ | -------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.3.0 |
+| <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 6.0   |
 
-### Providers
+## Providers
 
 | Name                                             | Version |
 | ------------------------------------------------ | ------- |
-| <a name="provider_aws"></a> [aws](#provider_aws) | 5.31.0  |
+| <a name="provider_aws"></a> [aws](#provider_aws) | ~> 6.0  |
 
-### Modules
+## Modules
 
 | Name                                                                                         | Source                                             | Version |
 | -------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- |
-| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 5.33.0  |
-| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 0.4.1   |
-| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 0.4.1   |
-| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 0.4.1   |
-| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 5.4.0   |
+| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 6.4.0   |
+| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 0.5.0   |
+| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 0.5.0   |
+| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 0.5.0   |
+| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 6.6.0   |
 
-### Resources
+## Resources
 
 | Name                                                                                                                                                          | Type        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -494,26 +641,30 @@ Module path: examples/complete
 | [aws_ecs_account_setting_default.container_insights](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_account_setting_default) | resource    |
 | [aws_kms_alias.ebs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias)                                                 | data source |
 
-### Inputs
+## Inputs
 
-| Name                                                                                          | Description                                      | Type                                                                                                                                                                                                                                                                                                                      | Default                                                                                                                                                                                                                       | Required |
-| --------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
-| <a name="input_budget_alert_emails"></a> [budget_alert_emails](#input_budget_alert_emails)    | n/a                                              | `set(string)`                                                                                                                                                                                                                                                                                                             | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_budget_monthly_limit"></a> [budget_monthly_limit](#input_budget_monthly_limit) | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_context"></a> [context](#input_context)                                        | Shared Context from Ben's terraform-null-context | <pre>object({<br> attributes = list(string)<br> dns_namespace = string<br> environment = string<br> instance = string<br> instance_short = string<br> namespace = string<br> region = string<br> region_short = string<br> role = string<br> role_short = string<br> project = string<br> tags = map(string)<br> })</pre> | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                              | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                           |   yes    |
-| <a name="input_network"></a> [network](#input_network)                                        | n/a                                              | <pre>object({<br> cidr = string<br> enable_nat = bool<br> one_nat = bool<br> enable_private = bool<br> subnets = list(object({<br> az = string<br> public = string<br> private = string<br> }))<br> })</pre>                                                                                                              | <pre>{<br> "cidr": "0.0.0.0/0",<br> "enable_nat": false,<br> "enable_private": false,<br> "one_nat": true,<br> "subnets": [<br> {<br> "az": "us-east-1a",<br> "private": "",<br> "public": "0.0.0.0/0"<br> }<br> ]<br>}</pre> |    no    |
+| Name                                                                                          | Description                                                                                   | Type                                                                                                                                                                                                                                                                                                                      | Default                                                                                                                                                                                                                           | Required |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: |
+| <a name="input_budget_alert_emails"></a> [budget_alert_emails](#input_budget_alert_emails)    | n/a                                                                                           | `set(string)`                                                                                                                                                                                                                                                                                                             | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_budget_monthly_limit"></a> [budget_monthly_limit](#input_budget_monthly_limit) | n/a                                                                                           | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_context"></a> [context](#input_context)                                        | Shared Context from Ben's terraform-null-context                                              | <pre>object({<br> attributes = list(string)<br> dns_namespace = string<br> environment = string<br> instance = string<br> instance_short = string<br> namespace = string<br> region = string<br> region_short = string<br> role = string<br> role_short = string<br> project = string<br> tags = map(string)<br> })</pre> | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                                                                           | `string`                                                                                                                                                                                                                                                                                                                  | n/a                                                                                                                                                                                                                               |   yes    |
+| <a name="input_network"></a> [network](#input_network)                                        | Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'. | <pre>object({<br> cidr = string<br> enable_nat = bool<br> one_nat = bool<br> enable_private = bool<br> ip_mode = optional(string, "ipv4")<br> subnets = list(object({<br> az = string<br> public = optional(string, null)<br> private = optional(string, null)<br> }))<br> })</pre>                                       | <pre>{<br> "cidr": "0.0.0.0/0",<br> "enable_nat": false,<br> "enable_private": false,<br> "ip_mode": "ipv4",<br> "one_nat": true,<br> "subnets": [<br> {<br> "az": "us-east-1a",<br> "public": "0.0.0.0/0"<br> }<br> ]<br>}</pre> |    no    |
 
-### Outputs
+## Outputs
 
-| Name                                                                                                                                                        | Description |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| <a name="output_aws_budgets_budget_monthly_total_account"></a> [aws_budgets_budget_monthly_total_account](#output_aws_budgets_budget_monthly_total_account) | n/a         |
-| <a name="output_aws_budgets_budget_monthly_total_name"></a> [aws_budgets_budget_monthly_total_name](#output_aws_budgets_budget_monthly_total_name)          | n/a         |
-| <a name="output_vpc_azs"></a> [vpc_azs](#output_vpc_azs)                                                                                                    | n/a         |
-| <a name="output_vpc_id"></a> [vpc_id](#output_vpc_id)                                                                                                       | n/a         |
-| <a name="output_vpc_private_subnet_ids"></a> [vpc_private_subnet_ids](#output_vpc_private_subnet_ids)                                                       | n/a         |
-| <a name="output_vpc_public_subnet_ids"></a> [vpc_public_subnet_ids](#output_vpc_public_subnet_ids)                                                          | n/a         |
+| Name                                                                                                                                                        | Description                                  |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| <a name="output_aws_budgets_budget_monthly_total_account"></a> [aws_budgets_budget_monthly_total_account](#output_aws_budgets_budget_monthly_total_account) | n/a                                          |
+| <a name="output_aws_budgets_budget_monthly_total_name"></a> [aws_budgets_budget_monthly_total_name](#output_aws_budgets_budget_monthly_total_name)          | n/a                                          |
+| <a name="output_vpc_azs"></a> [vpc_azs](#output_vpc_azs)                                                                                                    | n/a                                          |
+| <a name="output_vpc_egress_only_internet_gateway_id"></a> [vpc_egress_only_internet_gateway_id](#output_vpc_egress_only_internet_gateway_id)                | The ID of the egress-only Internet Gateway   |
+| <a name="output_vpc_id"></a> [vpc_id](#output_vpc_id)                                                                                                       | n/a                                          |
+| <a name="output_vpc_ipv6_cidr_block"></a> [vpc_ipv6_cidr_block](#output_vpc_ipv6_cidr_block)                                                                | The IPv6 CIDR block assigned to the VPC      |
+| <a name="output_vpc_private_subnet_ids"></a> [vpc_private_subnet_ids](#output_vpc_private_subnet_ids)                                                       | n/a                                          |
+| <a name="output_vpc_private_subnet_ipv6_cidr_blocks"></a> [vpc_private_subnet_ipv6_cidr_blocks](#output_vpc_private_subnet_ipv6_cidr_blocks)                | List of IPv6 CIDR blocks for private subnets |
+| <a name="output_vpc_public_subnet_ids"></a> [vpc_public_subnet_ids](#output_vpc_public_subnet_ids)                                                          | n/a                                          |
+| <a name="output_vpc_public_subnet_ipv6_cidr_blocks"></a> [vpc_public_subnet_ipv6_cidr_blocks](#output_vpc_public_subnet_ipv6_cidr_blocks)                   | List of IPv6 CIDR blocks for public subnets  |
 
 <!-- END_TF_DOCS -->
 

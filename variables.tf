@@ -37,10 +37,11 @@ variable "network" {
     enable_nat     = bool
     one_nat        = bool
     enable_private = bool
+    ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
-      public  = string
-      private = string
+      public  = optional(string)
+      private = optional(string)
     }))
   })
   default = {
@@ -48,13 +49,35 @@ variable "network" {
     enable_nat     = false
     one_nat        = true
     enable_private = false
+    ip_mode        = "ipv4"
     subnets = [
       {
-        az      = "us-east-1a"
-        public  = "0.0.0.0/0"
-        private = ""
+        az     = "us-east-1a"
+        public = "0.0.0.0/0"
       }
     ]
   }
-  description = ""
+  description = "Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'."
+
+  validation {
+    condition     = contains(["ipv4", "dual-stack", "ipv6-only"], var.network.ip_mode)
+    error_message = "ip_mode must be one of: ipv4, dual-stack, ipv6-only"
+  }
+
+  validation {
+    condition = (
+      var.network.ip_mode == "ipv6-only" ||
+      alltrue([for s in var.network.subnets : s.public != null])
+    )
+    error_message = "All subnets must have a non-null 'public' CIDR when ip_mode is 'ipv4' or 'dual-stack'."
+  }
+
+  validation {
+    condition = (
+      !var.network.enable_private ||
+      var.network.ip_mode == "ipv6-only" ||
+      alltrue([for s in var.network.subnets : s.private != null])
+    )
+    error_message = "All subnets must have a non-null 'private' CIDR when enable_private is true and ip_mode is not 'ipv6-only'."
+  }
 }

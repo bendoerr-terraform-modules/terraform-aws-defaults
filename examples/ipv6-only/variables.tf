@@ -132,28 +132,24 @@ variable "network" {
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
-      public  = string
-      private = string
+      public  = optional(string, null)
+      private = optional(string, null)
     }))
   })
   default = {
-    cidr           = "10.10.0.0/16"
+    cidr           = "10.20.0.0/16"
     enable_nat     = false
-    one_nat        = true
+    one_nat        = false
     enable_private = true
-    ip_mode        = "dual-stack"
+    ip_mode        = "ipv6-only"
     subnets = [
       {
-        az      = "us-east-1a"
-        public  = "10.10.1.0/24"
-        private = "10.10.11.0/24"
+        az = "us-east-1a"
       },
       {
-        az      = "us-east-1b"
-        public  = "10.10.2.0/24"
-        private = "10.10.12.0/24"
+        az = "us-east-1b"
       }
     ]
   }
-  description = ""
+  description = "Network configuration including CIDR, subnets, NAT, and IPv6 ip_mode."
 }
