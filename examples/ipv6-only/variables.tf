@@ -126,9 +126,9 @@ variable "iam_alias_postfix" {
 variable "network" {
   type = object({
     cidr           = string
-    enable_nat     = bool
-    one_nat        = bool
-    enable_private = bool
+    enable_nat     = optional(bool, false)
+    one_nat        = optional(bool, false)
+    enable_private = optional(bool, true)
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
