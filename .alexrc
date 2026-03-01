@@ -1,3 +1,33 @@
 {
-  "allow": ["simple"]
+  "allow": [
+    "basic",
+    "clearly",
+    "cock",
+    "color",
+    "dad-mom",
+    "disabled",
+    "dummy",
+    "easy",
+    "everyone-knows",
+    "execute",
+    "execution",
+    "failed",
+    "failure",
+    "fu",
+    "grandfather-clause",
+    "grandfathered",
+    "grandfathering",
+    "hang",
+    "invalid",
+    "just",
+    "master-key",
+    "master-plan",
+    "remains",
+    "simple",
+    "simply",
+    "spa",
+    "special"
+  ],
+  "profanitySureness": 2,
+  "noBinary": false
 }
