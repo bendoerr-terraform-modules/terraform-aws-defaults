@@ -63,7 +63,7 @@ alerts to help avoid run-away costs.
 
 ## Usage
 
-The basic defaults are straight forward with variations on network configuration
+The basic defaults are straightforward with variations on network configuration
 presenting various options. See the Costs section for the implications of
 network topology on cost.
 
