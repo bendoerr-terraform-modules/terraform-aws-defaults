@@ -28,7 +28,7 @@ locals {
 
 module "vpc_default" {
   source     = "terraform-aws-modules/vpc/aws"
-  version    = "6.6.0"
+  version    = "6.6.1"
   create_vpc = true
 
   name = module.label_network.id
