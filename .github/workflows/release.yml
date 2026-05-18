@@ -17,19 +17,19 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2.19.3
         with:
           egress-policy: audit
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - uses: mikepenz/release-changelog-builder-action@a34a8009a9588bb86b02a873cf592440e96a5da8 # v5
+      - uses: mikepenz/release-changelog-builder-action@348e88fab4c37338b1e803ceb2d4a7a5db6c0833 # v5
         id: build_changelog
         with:
           configuration: .github/changelog.json
           failOnError: "true"
           fetchReviewers: "true"
 
-      - uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+      - uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           body: ${{steps.build_changelog.outputs.changelog}}
