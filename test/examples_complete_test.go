@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/budgets"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -38,41 +39,45 @@ func setupAWSAndPreserveAlias(t *testing.T, region string) *budgets.Client {
 
 	if len(aa.AccountAliases) > 0 {
 		accountAlias := aa.AccountAliases[0]
-		t.Cleanup(func() {
-			svc := iam.NewFromConfig(cfg)
-
-			// AWS accounts hold at most one alias. If the original is already
-			// set we're done; if something else is set we have to remove it
-			// before CreateAccountAlias will succeed.
-			current, listErr := svc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
-			if listErr != nil {
-				t.Fatal(listErr)
-			}
-			if len(current.AccountAliases) > 0 && current.AccountAliases[0] == accountAlias {
-				return
-			}
-			if len(current.AccountAliases) > 0 {
-				existing := current.AccountAliases[0]
-				if _, delErr := svc.DeleteAccountAlias(
-					context.TODO(),
-					&iam.DeleteAccountAliasInput{AccountAlias: &existing},
-				); delErr != nil {
-					t.Fatal(delErr)
-				}
-			}
-
-			t.Log("Setting account alias: " + accountAlias)
-			if _, createErr := svc.CreateAccountAlias(
-				context.TODO(),
-				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
-			); createErr != nil {
-				t.Fatal(createErr)
-			}
-		})
+		t.Cleanup(func() { restoreAccountAlias(t, cfg, accountAlias) })
 	}
 
 	budgetsSvc := budgets.NewFromConfig(cfg)
 	return budgetsSvc
+}
+
+// restoreAccountAlias idempotently sets the account alias back to target.
+// AWS accounts hold at most one alias, so if the target is already set we
+// no-op; if a different alias is set we delete it before creating.
+func restoreAccountAlias(t *testing.T, cfg aws.Config, target string) {
+	t.Helper()
+	svc := iam.NewFromConfig(cfg)
+
+	current, err := svc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(current.AccountAliases) > 0 && current.AccountAliases[0] == target {
+		return
+	}
+	if len(current.AccountAliases) > 0 {
+		existing := current.AccountAliases[0]
+		if _, err := svc.DeleteAccountAlias(
+			context.TODO(),
+			&iam.DeleteAccountAliasInput{AccountAlias: &existing},
+		); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	t.Log("Setting account alias: " + target)
+	if _, err := svc.CreateAccountAlias(
+		context.TODO(),
+		&iam.CreateAccountAliasInput{AccountAlias: &target},
+	); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestDefaults(t *testing.T) {
