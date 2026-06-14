@@ -63,20 +63,20 @@ func restoreAccountAlias(t *testing.T, cfg aws.Config, target string) {
 	}
 	if len(current.AccountAliases) > 0 {
 		existing := current.AccountAliases[0]
-		if _, err := svc.DeleteAccountAlias(
+		if _, delErr := svc.DeleteAccountAlias(
 			context.TODO(),
 			&iam.DeleteAccountAliasInput{AccountAlias: &existing},
-		); err != nil {
-			t.Fatal(err)
+		); delErr != nil {
+			t.Fatal(delErr)
 		}
 	}
 
 	t.Log("Setting account alias: " + target)
-	if _, err := svc.CreateAccountAlias(
+	if _, createErr := svc.CreateAccountAlias(
 		context.TODO(),
 		&iam.CreateAccountAliasInput{AccountAlias: &target},
-	); err != nil {
-		t.Fatal(err)
+	); createErr != nil {
+		t.Fatal(createErr)
 	}
 }
 
