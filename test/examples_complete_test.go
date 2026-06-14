@@ -39,13 +39,33 @@ func setupAWSAndPreserveAlias(t *testing.T, region string) *budgets.Client {
 	if len(aa.AccountAliases) > 0 {
 		accountAlias := aa.AccountAliases[0]
 		t.Cleanup(func() {
-			t.Log("Setting account alias: " + accountAlias)
 			svc := iam.NewFromConfig(cfg)
-			_, createErr := svc.CreateAccountAlias(
+
+			// AWS accounts hold at most one alias. If the original is already
+			// set we're done; if something else is set we have to remove it
+			// before CreateAccountAlias will succeed.
+			current, listErr := svc.ListAccountAliases(context.TODO(), &iam.ListAccountAliasesInput{})
+			if listErr != nil {
+				t.Fatal(listErr)
+			}
+			if len(current.AccountAliases) > 0 && current.AccountAliases[0] == accountAlias {
+				return
+			}
+			if len(current.AccountAliases) > 0 {
+				existing := current.AccountAliases[0]
+				if _, delErr := svc.DeleteAccountAlias(
+					context.TODO(),
+					&iam.DeleteAccountAliasInput{AccountAlias: &existing},
+				); delErr != nil {
+					t.Fatal(delErr)
+				}
+			}
+
+			t.Log("Setting account alias: " + accountAlias)
+			if _, createErr := svc.CreateAccountAlias(
 				context.TODO(),
 				&iam.CreateAccountAliasInput{AccountAlias: &accountAlias},
-			)
-			if createErr != nil {
+			); createErr != nil {
 				t.Fatal(createErr)
 			}
 		})
