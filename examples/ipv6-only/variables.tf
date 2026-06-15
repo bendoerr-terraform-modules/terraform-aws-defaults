@@ -127,8 +127,8 @@ variable "network" {
   type = object({
     cidr           = string
     enable_nat     = optional(bool, false)
-    one_nat        = optional(bool, false)
-    enable_private = optional(bool, true)
+    one_nat        = optional(bool, true)
+    enable_private = optional(bool, false)
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
@@ -137,11 +137,8 @@ variable "network" {
     }))
   })
   default = {
-    cidr           = "10.20.0.0/16"
-    enable_nat     = false
-    one_nat        = false
-    enable_private = true
-    ip_mode        = "ipv6-only"
+    cidr    = "10.20.0.0/16"
+    ip_mode = "ipv6-only"
     subnets = [
       {
         az = "us-east-1a"

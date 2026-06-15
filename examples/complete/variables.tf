@@ -128,7 +128,7 @@ variable "network" {
     cidr           = string
     enable_nat     = optional(bool, false)
     one_nat        = optional(bool, true)
-    enable_private = optional(bool, true)
+    enable_private = optional(bool, false)
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
@@ -137,11 +137,8 @@ variable "network" {
     }))
   })
   default = {
-    cidr           = "10.10.0.0/16"
-    enable_nat     = false
-    one_nat        = true
-    enable_private = true
-    ip_mode        = "dual-stack"
+    cidr    = "10.10.0.0/16"
+    ip_mode = "dual-stack"
     subnets = [
       {
         az      = "us-east-1a"
