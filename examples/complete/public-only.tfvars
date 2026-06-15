@@ -1,8 +1,7 @@
+# Demonstrates the optional() defaults: enable_nat=false, one_nat=true,
+# enable_private=false are all module defaults, so we omit them here.
 network = {
-  cidr           = "10.10.0.0/16"
-  enable_nat     = false
-  one_nat        = true
-  enable_private = false
+  cidr = "10.10.0.0/16"
   subnets = [
     {
       az      = "us-east-1a"

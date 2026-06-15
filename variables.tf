@@ -34,9 +34,9 @@ variable "iam_alias_postfix" {
 variable "network" {
   type = object({
     cidr           = string
-    enable_nat     = bool
-    one_nat        = bool
-    enable_private = bool
+    enable_nat     = optional(bool, false)
+    one_nat        = optional(bool, true)
+    enable_private = optional(bool, false)
     ip_mode        = optional(string, "ipv4")
     subnets = list(object({
       az      = string
@@ -45,11 +45,7 @@ variable "network" {
     }))
   })
   default = {
-    cidr           = "0.0.0.0/0"
-    enable_nat     = false
-    one_nat        = true
-    enable_private = false
-    ip_mode        = "ipv4"
+    cidr = "0.0.0.0/0"
     subnets = [
       {
         az     = "us-east-1a"
@@ -57,7 +53,14 @@ variable "network" {
       }
     ]
   }
-  description = "Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'."
+  description = <<-EOT
+    Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'.
+
+    NAT defaults are cost-optimized, not HA-optimized: enable_nat=false, one_nat=true.
+    When a caller flips enable_nat=true and leaves one_nat unset, they get a single
+    shared NAT gateway (no cross-AZ redundancy in the NAT path). Set one_nat=false
+    to get one NAT gateway per AZ.
+    EOT
 
   validation {
     condition     = contains(["ipv4", "dual-stack", "ipv6-only"], var.network.ip_mode)
