@@ -634,30 +634,30 @@ will find a compatible version automatically.
 
 <!-- BEGIN_TF_DOCS -->
 
-## Requirements
+### Requirements
 
 | Name                                                                     | Version  |
 | ------------------------------------------------------------------------ | -------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement_terraform) | >= 1.3.0 |
 | <a name="requirement_aws"></a> [aws](#requirement_aws)                   | ~> 6.0   |
 
-## Providers
+### Providers
 
 | Name                                             | Version |
 | ------------------------------------------------ | ------- |
 | <a name="provider_aws"></a> [aws](#provider_aws) | ~> 6.0  |
 
-## Modules
+### Modules
 
 | Name                                                                                         | Source                                             | Version |
 | -------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------- |
-| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 6.4.0   |
-| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 0.5.0   |
-| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 0.5.0   |
-| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 0.5.0   |
-| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 6.6.0   |
+| <a name="module_iam_account"></a> [iam_account](#module_iam_account)                         | terraform-aws-modules/iam/aws//modules/iam-account | 6.6.1   |
+| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null              | 1.0.0   |
+| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null              | 1.0.0   |
+| <a name="module_label_network"></a> [label_network](#module_label_network)                   | bendoerr-terraform-modules/label/null              | 1.0.0   |
+| <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default)                         | terraform-aws-modules/vpc/aws                      | 6.6.1   |
 
-## Resources
+### Resources
 
 | Name                                                                                                                                                          | Type        |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
@@ -669,7 +669,7 @@ will find a compatible version automatically.
 | [aws_ecs_account_setting_default.container_insights](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_account_setting_default) | resource    |
 | [aws_kms_alias.ebs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/kms_alias)                                                 | data source |
 
-## Inputs
+### Inputs
 
 | Name                                                                                          | Description                                                                                                                                                                                                                                                                                                                                                                                         | Type                                                                                                                                                                                                                                                                                                                                   | Default                                                                                                                                 | Required |
 | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | :------: |
@@ -679,7 +679,7 @@ will find a compatible version automatically.
 | <a name="input_iam_alias_postfix"></a> [iam_alias_postfix](#input_iam_alias_postfix)          | n/a                                                                                                                                                                                                                                                                                                                                                                                                 | `string`                                                                                                                                                                                                                                                                                                                               | n/a                                                                                                                                     |   yes    |
 | <a name="input_network"></a> [network](#input_network)                                        | Network configuration for VPC. ip_mode can be 'ipv4' (default), 'dual-stack', or 'ipv6-only'.<br/><br/>NAT defaults are cost-optimized, not HA-optimized: enable_nat=false, one_nat=true.<br/>When a caller flips enable_nat=true and leaves one_nat unset, they get a single<br/>shared NAT gateway (no cross-AZ redundancy in the NAT path). Set one_nat=false<br/>to get one NAT gateway per AZ. | <pre>object({<br/> cidr = string<br/> enable_nat = optional(bool, false)<br/> one_nat = optional(bool, true)<br/> enable_private = optional(bool, false)<br/> ip_mode = optional(string, "ipv4")<br/> subnets = list(object({<br/> az = string<br/> public = optional(string)<br/> private = optional(string)<br/> }))<br/> })</pre>   | <pre>{<br/> "cidr": "0.0.0.0/0",<br/> "subnets": [<br/> {<br/> "az": "us-east-1a",<br/> "public": "0.0.0.0/0"<br/> }<br/> ]<br/>}</pre> |    no    |
 
-## Outputs
+### Outputs
 
 | Name                                                                                                                                                        | Description                                  |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
