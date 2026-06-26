@@ -1,0 +1,4 @@
+# Markdown is owned by mdformat (see .pre-commit-config.yaml), not prettier.
+# Keep prettier off all markdown so the two formatters never fight over it.
+*.md
+**/*.md
