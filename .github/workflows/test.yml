@@ -22,7 +22,53 @@ jobs:
       - name: "Harden Runner"
         uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            *.bendoerr.com:443
+            *.cloudfront.net:443
+            *.execute-api.us-east-1.amazonaws.com:443
+            *.s3.amazonaws.com:443
+            *.s3.us-east-1.amazonaws.com:443
+            234656776442.ddb.us-east-1.amazonaws.com:443
+            234656776442.s3-control.us-east-1.amazonaws.com:443
+            acm.us-east-1.amazonaws.com:443
+            apigateway.us-east-1.amazonaws.com:443
+            budgets.amazonaws.com:443
+            checkpoint-api.hashicorp.com:443
+            cloudfront.amazonaws.com:443
+            cognito-idp.us-east-1.amazonaws.com:443
+            discord.com:443
+            dynamodb.us-east-1.amazonaws.com:443
+            ec2.us-east-1.amazonaws.com:443
+            ec2.us-west-2.amazonaws.com:443
+            ecs.us-east-1.amazonaws.com:443
+            ecs.us-west-2.amazonaws.com:443
+            elasticfilesystem.us-east-1.amazonaws.com:443
+            gateway.discord.gg:443
+            github.com:22
+            github.com:443
+            go.dev:443
+            golang.org:443
+            hosted-compute-watchdog-prod-eus-01.githubapp.com:443
+            hosted-compute-watchdog-prod-iad-01.githubapp.com:443
+            iam.amazonaws.com:443
+            keybase.io:443
+            kms.us-east-1.amazonaws.com:443
+            kms.us-west-2.amazonaws.com:443
+            lambda.us-east-1.amazonaws.com:443
+            logs.us-east-1.amazonaws.com:443
+            objects.githubusercontent.com:443
+            proxy.golang.org:443
+            registry.npmjs.org:443
+            registry.terraform.io:443
+            releases.hashicorp.com:443
+            route53.amazonaws.com:443
+            s3.amazonaws.com:443
+            sns.us-east-1.amazonaws.com:443
+            storage.googleapis.com:443
+            sts.us-east-1.amazonaws.com:443
+            sts.us-west-2.amazonaws.com:443
+            sum.golang.org:443
 
       - name: "Checkout"
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
