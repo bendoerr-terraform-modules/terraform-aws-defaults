@@ -50,6 +50,11 @@ repos:
     rev: "v3.1.0"
     hooks:
       - id: prettier
+        # Pin prettier exact to match the CI prettier job (package.json: 3.3.3).
+        # The mirror's rev bundles its own prettier and has no 3.3.3 tag, so this
+        # is a dependency pin, not a rev bump — it kills local<->CI skew on
+        # yaml/json (markdown is off prettier entirely via exclude_types).
+        additional_dependencies: ["prettier@3.3.3"]
         exclude_types:
           - markdown
 
