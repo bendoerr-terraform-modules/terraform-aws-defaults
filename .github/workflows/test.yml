@@ -34,7 +34,7 @@ jobs:
           cache: true
 
       - name: "Setup Terraform"
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e #v4.0.1
+        uses: step-security/setup-terraform@11f45fe036ccfd27d231861d38b183d405b059a9 # v4.0.0
 
       - name: "Configure AWS Credentials"
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -58,7 +58,7 @@ jobs:
         run: go-junit-report -set-exit-code < results.out > results.xml
 
       - name: "Upload Test Results"
-        uses: test-summary/action@37b508cfee6d4d080eedd00b5bb240a6a784a6a5 # v2.6
+        uses: step-security/test-summary-action@67391420afc3eba57f4cb249a1a5a677e0eacd9e # v2.4.3
         if: hashFiles('test/results.xml') != ''
         with:
           paths: test/results.xml
