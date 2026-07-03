@@ -22,4 +22,4 @@ jobs:
       packages: read
       actions: read
       contents: read
-    uses: bendoerr-terraform-modules/workflows/.github/workflows/codeql.yml@c2b51a26bb2c70baa655258fd44741345e4c9e95
+    uses: bendoerr-terraform-modules/workflows/.github/workflows/codeql.yml@716214c04b8bbf464692fd0a0b5309126dfd0092 # v1.2.5
