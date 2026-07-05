@@ -1,6 +1,6 @@
 module "label_monthly_total" {
   source  = "bendoerr-terraform-modules/label/null"
-  version = "1.0.0"
+  version = "1.0.1"
   context = var.context
   name    = "budget-monthly-total"
 }
