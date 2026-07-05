@@ -652,9 +652,9 @@ will find a compatible version automatically.
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_iam_account"></a> [iam_account](#module_iam_account) | terraform-aws-modules/iam/aws//modules/iam-account | 6.6.1 |
-| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null | 1.0.0 |
-| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null | 1.0.0 |
-| <a name="module_label_network"></a> [label_network](#module_label_network) | bendoerr-terraform-modules/label/null | 1.0.0 |
+| <a name="module_label_account_alias"></a> [label_account_alias](#module_label_account_alias) | bendoerr-terraform-modules/label/null | 1.0.1 |
+| <a name="module_label_monthly_total"></a> [label_monthly_total](#module_label_monthly_total) | bendoerr-terraform-modules/label/null | 1.0.1 |
+| <a name="module_label_network"></a> [label_network](#module_label_network) | bendoerr-terraform-modules/label/null | 1.0.1 |
 | <a name="module_vpc_default"></a> [vpc_default](#module_vpc_default) | terraform-aws-modules/vpc/aws | 6.6.1 |
 
 ### Resources
