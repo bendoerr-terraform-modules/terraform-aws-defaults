@@ -32,12 +32,14 @@ jobs:
             234656776442.ddb.us-east-1.amazonaws.com:443
             234656776442.s3-control.us-east-1.amazonaws.com:443
             acm.us-east-1.amazonaws.com:443
+            api.github.com:443
             apigateway.us-east-1.amazonaws.com:443
             budgets.amazonaws.com:443
             checkpoint-api.hashicorp.com:443
             cloudfront.amazonaws.com:443
             cognito-idp.us-east-1.amazonaws.com:443
             discord.com:443
+            dl.google.com:443
             dynamodb.us-east-1.amazonaws.com:443
             ec2.us-east-1.amazonaws.com:443
             ec2.us-west-2.amazonaws.com:443
@@ -59,8 +61,10 @@ jobs:
             logs.us-east-1.amazonaws.com:443
             objects.githubusercontent.com:443
             proxy.golang.org:443
+            raw.githubusercontent.com:443
             registry.npmjs.org:443
             registry.terraform.io:443
+            release-assets.githubusercontent.com:443
             releases.hashicorp.com:443
             route53.amazonaws.com:443
             s3.amazonaws.com:443
