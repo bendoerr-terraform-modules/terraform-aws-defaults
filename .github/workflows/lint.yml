@@ -19,7 +19,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: bendoerr-terraform-modules/workflows/.github/workflows/lint.yml@93e740f8fea20eda37207f4afd2908325972851e
+    uses: bendoerr-terraform-modules/workflows/.github/workflows/lint.yml@93e740f8fea20eda37207f4afd2908325972851e # v1.2.7
     with:
       tflint_version: ""
       markdownlint_flags: ""
