@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.10"
+  required_version = ">= 1.10.0" # floor-reason: above-root floor kept as found, reason unrecorded pre-2026-08-13
 
   required_providers {
     aws = {

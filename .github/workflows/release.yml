@@ -1,4 +1,4 @@
-# Thin caller -> reusable release publisher in bendoerr-terraform-modules/workflows (moving-@v1 lane).
+# Thin caller -> reusable release publisher in bendoerr-terraform-modules/workflows (immutable SHA pin, dependabot-bumped).
 # Tag trigger lives here (reusables are workflow_call-only). Job MUST grant contents:write +
 # pull-requests:write (caller-capped) or the reusable can't publish the release / fetch changelog reviewers.
 name: Publish release

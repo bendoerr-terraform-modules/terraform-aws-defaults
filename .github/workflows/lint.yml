@@ -23,3 +23,40 @@ jobs:
     with:
       tflint_version: ""
       markdownlint_flags: ""
+  paperwork:
+    # Tripwire for repos born from the template: fails until the new-repo checklist
+    # (top of README.md) is completed. Skipped in the template itself.
+    if: github.repository != 'bendoerr-terraform-modules/terraform-module-repo-template'
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+      - name: "Checkout"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Template paperwork done?"
+        run: |
+          set -euo pipefail
+          fail=0
+          todos=$(git grep -n 'TEMPLATE_TODO_' -- ':!.github' || true)
+          if [ -n "$todos" ]; then
+            echo "::error::unfilled template placeholders remain — complete the new-repo checklist at the top of terraform-module-repo-template's README"; echo "$todos"; fail=1
+          fi
+          # Substring 'repo-template' is INTENTIONALLY loose: it catches the full repo
+          # name (README URLs, test/go.mod, test/.golangci.yml) AND ctx.tf's shorter
+          # role string ("terraform-aws-repo-template"); the full name would miss the
+          # latter. Scope is a DENYLIST like its sibling above — an allowlist of
+          # expected files needed hand-extending twice in one morning; the name goes
+          # wherever it likes. A child legitimately named *repo-template* would trip
+          # this forever — change the needle if that day ever comes.
+          selfrefs=$(git grep -n 'repo-template' -- ':!.github' || true)
+          if [ -n "$selfrefs" ]; then
+            echo "::error::template self-references remain (badges/links/example role still point at the template) — see the new-repo checklist at the top of terraform-module-repo-template's README"; echo "$selfrefs"; fail=1
+          fi
+          exit $fail
