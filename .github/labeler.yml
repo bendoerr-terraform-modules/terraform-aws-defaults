@@ -1,0 +1,14 @@
+enhancement:
+  - head-branch: ["^feature", "feature", "^new", "new"]
+
+bug:
+  - head-branch: ["^fix", "fix", "^bug", "bug"]
+
+cicd:
+  - head-branch: ["^ci", "ci", "^cicd", "cicd"]
+
+documentation:
+  - head-branch: ["^docs", "docs"]
+
+cleanup:
+  - head-branch: ["^cleanup", "cleanup", "^chore", "chore"]
