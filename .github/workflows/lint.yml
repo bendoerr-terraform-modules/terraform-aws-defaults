@@ -40,23 +40,151 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: "Template paperwork done?"
+      - name: "Scan for template paperwork (the scanner must be able to look)"
+        id: scan
+        env:
+          PAPERWORK_FINDINGS: ${{ runner.temp }}/paperwork-findings.txt
         run: |
-          set -euo pipefail
-          fail=0
-          todos=$(git grep -n 'TEMPLATE_TODO_' -- ':!.github' || true)
-          if [ -n "$todos" ]; then
-            echo "::error::unfilled template placeholders remain — complete the new-repo checklist at the top of terraform-module-repo-template's README"; echo "$todos"; fail=1
+          # GitHub runs `run:` steps with `bash -eo pipefail {0}` unless a shell is declared,
+          # and `set -uo pipefail` does NOT clear an inherited `-e`. With a bare `cmd; rc=$?` the
+          # step dies on the scanner's rc=1 BEFORE the capture, so a real finding would red THIS
+          # step - "could not look" - and skip the evaluator entirely. That is the exact confusion
+          # the split exists to remove, and it lands on the COMMON case. `|| rc=$?` is `-e`-safe.
+          set -uo pipefail
+          rc=0
+          .github/scripts/paperwork-check.sh || rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          # Enumerate the WHOLE space, never the complement of one value. A missing or
+          # non-executable script returns 127, and `[ "$rc" -ne 2 ]` would let that exit 0 -
+          # the gate would go green with no script at all.
+          case "$rc" in
+            0 | 1) exit 0 ;;
+            2) echo "::error::the paperwork scanner could not look; this is NOT a clean result"; exit 1 ;;
+            *) echo "::error::paperwork scanner exited $rc - it did not run (missing? not executable?)"; exit 1 ;;
+          esac
+      - name: "Template paperwork done?"
+        # `always() && conclusion == success` rather than keying on the output STRING: were the
+        # output ever not surfaced, an `rc == '0' || rc == '1'` condition SKIPS this step while
+        # the scan step exited 0 - so the job goes green having evaluated nothing. That is the
+        # same "skipped reads as non-failing" hole the selftest job exists to close, one step
+        # down. The unexpected-value branch inside the step is the other half.
+        if: always() && steps.scan.conclusion == 'success'
+        env:
+          PAPERWORK_FINDINGS: ${{ runner.temp }}/paperwork-findings.txt
+          RC: ${{ steps.scan.outputs.rc }}
+        run: |
+          set -uo pipefail
+          case "$RC" in
+            0 | 1) ;;
+            *)
+              echo "::error::scan step succeeded but reported rc='$RC' - the handoff is broken"
+              exit 1
+              ;;
+          esac
+          # THE HANDOFF IS ASSERTED, NOT TRUSTED. A scanner that greens without writing its
+          # paperwork hands this step nothing, and green + green is the hole. Both halves would
+          # now have to lie in agreement.
+          if [ ! -f "$PAPERWORK_FINDINGS" ]; then
+            echo "::error::scanner exited $RC but wrote no findings file - the handoff is broken"
+            exit 1
           fi
-          # Substring 'repo-template' is INTENTIONALLY loose: it catches the full repo
-          # name (README URLs, test/go.mod, test/.golangci.yml) AND ctx.tf's shorter
-          # role string ("terraform-aws-repo-template"); the full name would miss the
-          # latter. Scope is a DENYLIST like its sibling above — an allowlist of
-          # expected files needed hand-extending twice in one morning; the name goes
-          # wherever it likes. A child legitimately named *repo-template* would trip
-          # this forever — change the needle if that day ever comes.
-          selfrefs=$(git grep -n 'repo-template' -- ':!.github' || true)
-          if [ -n "$selfrefs" ]; then
-            echo "::error::template self-references remain (badges/links/example role still point at the template) — see the new-repo checklist at the top of terraform-module-repo-template's README"; echo "$selfrefs"; fail=1
+          if [ "$RC" = "0" ] && [ -s "$PAPERWORK_FINDINGS" ]; then
+            echo "::error::scanner reported CLEAN but the findings file is non-empty - contradictory"
+            exit 1
           fi
-          exit $fail
+          if [ "$RC" = "1" ]; then
+            if [ ! -s "$PAPERWORK_FINDINGS" ]; then
+              echo "::error::scanner reported FINDINGS but the findings file is empty - contradictory"
+              exit 1
+            fi
+            echo "::error::template paperwork is incomplete - complete the new-repo checklist at the top of terraform-module-repo-template's README"
+            cat "$PAPERWORK_FINDINGS"
+            exit 1
+          fi
+          echo "paperwork verified: scanner reported CLEAN and the findings file is empty"
+
+  paperwork-selftest:
+    # NO `if:` guard, deliberately - and this comment is written CONTEXT-NEUTRALLY because the file
+    # is copied into every descendant, where a template-only sentence becomes false.
+    # In the TEMPLATE, the paperwork job above is skipped by its own `if:`, so without this job the
+    # gate's logic would never execute in the repo that authors it - and a skipped job reports as
+    # `skipped`, which every green-check reading correctly treats as non-failing.
+    # In a DESCENDANT, the paperwork job does run, and this job is additionally that repo's own
+    # forced control: copies are claims until each one's control has fired in its own CI.
+    # Either way a fixture is not the repo it runs in, which is why it is correct in both.
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+      - name: "Checkout"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Paperwork gate honours its exit contract"
+        run: .github/scripts/paperwork-selftest.sh
+      - name: "The .github exclusion still holds (the scripts must not match themselves)"
+        run: |
+          set -uo pipefail
+          # LOAD-BEARING: paperwork-check.sh contains the needles it searches for, and is safe only
+          # because ':!.github' excludes it. If that ever stops being true the gate matches its own
+          # definition and fails forever. This was a stated constraint with nothing verifying it.
+          # 🔴 THIS GUARD WAS TAUTOLOGICAL AND IS NOW DERIVED + CONTROLLED.
+          # v1 ran `git grep -l NEEDLE -- ':!.github' | grep '^\.github/'`. That pathspec excludes
+          # .github BY CONSTRUCTION, so the filtered list could never contain a .github/ path and
+          # the step always printed "exclusion holds". Forced in review: setting PATHSPEC='.' in
+          # the script made the gate match ITSELF (FINDINGS over 42 files), and this guard still
+          # exited 0. The one sabotage it exists to catch walked straight past it.
+          # Two changes: DERIVE the pathspec from the script instead of keeping a second copy of
+          # it here, and run a POSITIVE CONTROL first - if the needle is not findable under
+          # .github/ at all, the assertion below is vacuous and must say so rather than pass.
+          # `|| rc=$?`, not a bare assignment: GitHub's shell carries `-e`, so a missing or
+          # unreadable script makes sed exit non-zero and the step dies BEFORE the named error
+          # below - an anonymous red, in the guard whose whole purpose is a named one.
+          rc=0
+          PS=$(sed -n "s/^PATHSPEC='\(.*\)'$/\1/p" .github/scripts/paperwork-check.sh) || rc=$?
+          if [ "$rc" -ne 0 ]; then
+            echo "::error::could not read paperwork-check.sh to derive its pathspec (sed rc=$rc)"
+            exit 1
+          fi
+          if [ -z "$PS" ]; then
+            echo "::error::could not derive PATHSPEC from paperwork-check.sh - this guard cannot run"
+            exit 1
+          fi
+          echo "derived pathspec from the script: '$PS'"
+          for needle in TEMPLATE_TODO_ repo-template; do
+            rc=0
+            ctl=$(git grep -l "$needle") || rc=$?
+            case "$rc" in
+              0 | 1) ;;
+              *)
+                echo "::error::positive control for '$needle' could not run (git grep rc=$rc)"
+                exit 1
+                ;;
+            esac
+            if ! printf '%s\n' "$ctl" | grep -q '^\.github/'; then
+              echo "::error::VACUOUS: '$needle' does not appear under .github/ at all, so asserting it is excluded proves nothing"
+              exit 1
+            fi
+            rc=0
+            listed=$(git grep -l "$needle" -- "$PS") || rc=$?
+            case "$rc" in
+              0 | 1) ;;
+              *)
+                echo "::error::the exclusion check could not run for '$needle' (git grep rc=$rc) - NOT a pass"
+                exit 1
+                ;;
+            esac
+            inside=$(printf '%s\n' "$listed" | grep '^\.github/') || true
+            if [ -n "$inside" ]; then
+              echo "::error::the exclusion no longer holds - '$needle' is matched inside .github/, so the gate can match its own definition"
+              printf '%s\n' "$inside"
+              exit 1
+            fi
+            echo "  '$needle': present under .github/ (control) and excluded by '$PS' (assertion)"
+          done
+          echo "exclusion holds: no .github/ path is inside the gate's own scope"
