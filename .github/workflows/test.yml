@@ -87,7 +87,7 @@ jobs:
         uses: step-security/setup-terraform@856d52e2f56619a4928ffc98bf60837d96a8e682 # v4.0.1
 
       - name: "Configure AWS Credentials"
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
         with:
           role-to-assume: arn:aws:iam::234656776442:role/brd-sndbx-ue1-core-apply
           aws-region: us-east-1
