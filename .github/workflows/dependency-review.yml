@@ -15,6 +15,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: bendoerr-terraform-modules/workflows/.github/workflows/dependency-review.yml@63ce31cf4d1506a783227a4eb44f6d24d299b776 # v1.2.8
+    uses: bendoerr-terraform-modules/workflows/.github/workflows/dependency-review.yml@d72cfaafccf23642aaf8bd317bf68f6d9bacd635 # v1.3.0
     with:
       comment_summary: false
