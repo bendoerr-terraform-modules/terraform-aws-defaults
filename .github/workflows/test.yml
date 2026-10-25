@@ -20,7 +20,7 @@ jobs:
       id-token: write
     steps:
       - name: "Harden Runner"
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -114,7 +114,7 @@ jobs:
         run: go-junit-report -set-exit-code < results.out > results.xml
 
       - name: "Upload Test Results"
-        uses: step-security/test-summary-action@67391420afc3eba57f4cb249a1a5a677e0eacd9e # v2.4.3
+        uses: step-security/test-summary-action@abf583950a62dd915f2909155d69775d5cde6a40 # v2.6.0
         if: hashFiles('test/results.xml') != ''
         with:
           paths: test/results.xml
